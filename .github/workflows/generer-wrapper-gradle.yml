@@ -1,0 +1,150 @@
+name: Génération du wrapper Gradle
+
+# Lancement MANUEL uniquement :
+#   Actions → « Génération du wrapper Gradle » → Run workflow → choisir la branche et la version.
+#
+# Rôle : produire les fichiers que Grok ne peut pas écrire en texte
+#   - gradlew
+#   - gradlew.bat
+#   - gradle/wrapper/gradle-wrapper.jar   (fichier binaire)
+#   - gradle/wrapper/gradle-wrapper.properties
+# puis les commiter dans le dépôt, sur la branche choisie.
+#
+# Sécurités :
+#   - le wrapper est généré dans un dossier temporaire (un build Gradle cassé ne bloque pas la génération) ;
+#   - l'empreinte SHA-256 de la distribution Gradle est écrite dans gradle-wrapper.properties ;
+#   - le .jar est validé contre les empreintes officielles de Gradle avant tout commit ;
+#   - si les fichiers sont déjà à jour, aucun commit n'est créé.
+on:
+  workflow_dispatch:
+    inputs:
+      gradle_version:
+        description: "Version de Gradle (ex. 8.14.3). Doit être compatible avec la version du plugin Android (AGP) du projet."
+        type: string
+        default: "8.14.3"
+        required: true
+
+# Droit d'écriture nécessaire pour pousser le commit.
+permissions:
+  contents: write
+
+concurrency:
+  group: generation-wrapper-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  JAVA_VERSION: "17"
+
+jobs:
+  generer:
+    name: "Générer et commiter le wrapper"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Valider la version saisie
+        env:
+          GRADLE_VERSION: ${{ inputs.gradle_version }}
+        run: |
+          if ! [[ "$GRADLE_VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "::error title=Version invalide::« $GRADLE_VERSION » n'est pas un numéro de version Gradle valide (attendu : 8.14.3)."
+            exit 1
+          fi
+          echo "Version demandée : $GRADLE_VERSION"
+
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Installer Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ inputs.gradle_version }}
+          cache-disabled: true
+
+      - name: Générer le wrapper dans un dossier temporaire
+        env:
+          GRADLE_VERSION: ${{ inputs.gradle_version }}
+        run: |
+          set -euo pipefail
+
+          URL="https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip.sha256"
+          if ! SHA="$(curl -fsSL "$URL")"; then
+            echo "::error title=Version introuvable::Gradle $GRADLE_VERSION n'existe pas sur services.gradle.org."
+            exit 1
+          fi
+          SHA="$(printf '%s' "$SHA" | tr -d '[:space:]')"
+          if ! [[ "$SHA" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error title=Empreinte invalide::L'empreinte SHA-256 reçue n'a pas le format attendu."
+            exit 1
+          fi
+
+          GEN="$RUNNER_TEMP/wrapper-gen"
+          mkdir -p "$GEN"
+          touch "$GEN/settings.gradle.kts"
+          cd "$GEN"
+          gradle wrapper \
+            --gradle-version "$GRADLE_VERSION" \
+            --distribution-type bin \
+            --gradle-distribution-sha256-sum "$SHA" \
+            --no-daemon
+
+          echo "GEN_DIR=$GEN" >> "$GITHUB_ENV"
+
+      - name: Copier les fichiers dans le dépôt
+        run: |
+          set -euo pipefail
+          mkdir -p gradle/wrapper
+          cp "$GEN_DIR/gradlew" gradlew
+          cp "$GEN_DIR/gradlew.bat" gradlew.bat
+          cp "$GEN_DIR/gradle/wrapper/gradle-wrapper.jar" gradle/wrapper/gradle-wrapper.jar
+          cp "$GEN_DIR/gradle/wrapper/gradle-wrapper.properties" gradle/wrapper/gradle-wrapper.properties
+          chmod +x gradlew
+          echo "Contenu de gradle-wrapper.properties :"
+          cat gradle/wrapper/gradle-wrapper.properties
+
+      - name: Valider le .jar contre les empreintes officielles de Gradle
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Vérifier que le wrapper fonctionne
+        run: |
+          ./gradlew --version --no-daemon
+
+      - name: Commiter et pousser
+        env:
+          BRANCH: ${{ github.ref_name }}
+          GRADLE_VERSION: ${{ inputs.gradle_version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add --chmod=+x gradlew
+          git add gradlew.bat gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.properties
+
+          if git diff --cached --quiet; then
+            echo "Les fichiers du wrapper sont déjà à jour : aucun commit créé."
+            echo "Wrapper Gradle $GRADLE_VERSION : déjà à jour, aucun commit." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          git commit -m "chore(build): génération du wrapper Gradle $GRADLE_VERSION"
+
+          if ! git push origin "HEAD:$BRANCH"; then
+            echo "Push refusé (la branche a bougé) : nouvelle tentative après mise à jour."
+            git pull --rebase origin "$BRANCH"
+            git push origin "HEAD:$BRANCH"
+          fi
+
+          {
+            echo "### Wrapper Gradle $GRADLE_VERSION commité sur \`$BRANCH\`"
+            echo ""
+            echo "- \`gradlew\`"
+            echo "- \`gradlew.bat\`"
+            echo "- \`gradle/wrapper/gradle-wrapper.jar\`"
+            echo "- \`gradle/wrapper/gradle-wrapper.properties\`"
+          } >> "$GITHUB_STEP_SUMMARY"
