@@ -1,0 +1,305 @@
+name: Vérifications DSI Android
+
+# Lancement MANUEL uniquement : Actions → « Vérifications DSI Android » → Run workflow → choisir l'étape.
+# Les étapes sont cumulatives : choisir « 3 » exécute aussi 1 et 2.
+# Aucune étape ne construit d'APK avant l'étape 5.
+on:
+  workflow_dispatch:
+    inputs:
+      etape:
+        description: "Jusqu'à quelle étape vérifier ?"
+        type: choice
+        default: "1-controles-rapides"
+        options:
+          - "1-controles-rapides"
+          - "2-qualite"
+          - "3-compilation"
+          - "4-tests"
+          - "5-apk-debug"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verifications-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: "17"
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # ÉTAPE 1 — Contrôles rapides (sans Gradle, sans compilation)
+  # ─────────────────────────────────────────────────────────────
+  rapides:
+    name: "1 · Contrôles rapides"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      level: ${{ steps.niveau.outputs.level }}
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Déterminer le niveau demandé
+        id: niveau
+        env:
+          ETAPE: ${{ inputs.etape }}
+        run: |
+          LEVEL="${ETAPE%%-*}"
+          echo "level=$LEVEL" >> "$GITHUB_OUTPUT"
+          echo "Étape demandée : $ETAPE (niveau $LEVEL)"
+          if [ "$LEVEL" -ge 2 ] && [ ! -f gradlew ]; then
+            echo "::error title=Projet Gradle absent::L'étape $LEVEL exige le projet Gradle (fichier gradlew introuvable). Lancer l'étape 1 tant que le squelette Gradle n'existe pas."
+            exit 1
+          fi
+
+      - name: Présence de la documentation
+        run: |
+          ERR=0
+          for f in docs/ARCHITECTURE.md docs/CONTRATS-API.md; do
+            if [ ! -f "$f" ]; then
+              echo "::error title=Document manquant::$f est obligatoire."
+              ERR=1
+            fi
+          done
+          [ -f docs/DESIGN-TOKENS.md ] || echo "::warning title=Document manquant::docs/DESIGN-TOKENS.md n'existe pas encore."
+          exit $ERR
+
+      - name: Règles d'architecture et contenu interdit
+        shell: bash
+        run: |
+          set -uo pipefail
+          ERR=0
+          EXCL=(--include='*.kt' --exclude-dir=build --exclude-dir=test --exclude-dir=androidTest --exclude-dir=.gradle)
+
+          # _scan TITRE REGEX AUTORISER_DEROGATION DOSSIERS...
+          _scan() {
+            local titre="$1" re="$2" allow="$3"; shift 3
+            local dirs=() d out
+            for d in "$@"; do [ -d "$d" ] && dirs+=("$d"); done
+            [ ${#dirs[@]} -eq 0 ] && return 0
+            out=$(grep -rEn "${EXCL[@]}" -e "$re" "${dirs[@]}" 2>/dev/null || true)
+            if [ "$allow" = "1" ] && [ -n "$out" ]; then
+              out=$(echo "$out" | grep -v 'dsi-allow-literal' || true)
+            fi
+            if [ -n "$out" ]; then
+              ERR=1
+              echo "::error title=$titre::$(echo "$out" | wc -l) violation(s)"
+              echo "✗ $titre"
+              echo "$out" | head -25 | sed 's/^/     /'
+            fi
+          }
+          scan()     { local t="$1" r="$2"; shift 2; _scan "$t" "$r" 0 "$@"; }
+          scan_lit() { local t="$1" r="$2"; shift 2; _scan "$t" "$r" 1 "$@"; }
+
+          # 1. feature
+          scan "feature importe data" '^import +bf\.dsi\.academy\.data\.' feature
+          scan "feature importe API ou DTO ou mapper ou local" '^import +bf\.dsi\.academy\..*\.(dto|api|mapper|local)\.' feature
+          scan "feature importe reseau ou disque" '^import +(retrofit2|okhttp3|androidx\.room|androidx\.datastore)' feature
+          if [ -d feature ]; then
+            for m in feature/*/; do
+              n=$(basename "$m")
+              out=$(grep -rEn "${EXCL[@]}" -e '^import +bf\.dsi\.academy\.feature\.' "$m" 2>/dev/null | grep -v "import bf\.dsi\.academy\.feature\.$n\." || true)
+              if [ -n "$out" ]; then
+                ERR=1
+                echo "::error title=feature $n importe une autre feature::$(echo "$out" | wc -l) violation(s)"
+                echo "✗ feature $n importe une autre feature"
+                echo "$out" | head -10 | sed 's/^/     /'
+              fi
+            done
+          fi
+
+          # 2. domain pur
+          scan "domain non pur" '^import +(android\.|androidx\.|retrofit2|okhttp3|kotlinx\.serialization|com\.google\.)' domain
+          scan "domain depend de data ou feature ou app" '^import +bf\.dsi\.academy\.(data|feature|app)\.' domain
+          scan "domain depend d'un core autre que common" '^import +bf\.dsi\.academy\.core\.(network|session|database|media|designsystem|testing)' domain
+
+          # 3. core
+          scan "core depend de domain ou data ou feature" '^import +bf\.dsi\.academy\.(domain|data|feature)\.' core
+          scan "core common non pur" '^import +(android\.|androidx\.)' core/common
+
+          # 4. fichiers Gradle
+          if [ -d feature ]; then
+            out=$(grep -rEn --include=build.gradle.kts -e 'project\(":(data|feature)' feature 2>/dev/null || true)
+            if [ -n "$out" ]; then
+              ERR=1
+              echo "::error title=build feature depend de data ou d'une feature::$(echo "$out" | wc -l) violation(s)"
+              echo "✗ build.gradle.kts de feature depend de data ou d'une autre feature"
+              echo "$out" | head -10 | sed 's/^/     /'
+            fi
+          fi
+          for f in domain/build.gradle.kts core/common/build.gradle.kts; do
+            if [ -f "$f" ]; then
+              out=$(grep -En -i -e 'android' -e 'project\(":(data|feature|app)' "$f" || true)
+              if [ -n "$out" ]; then
+                ERR=1
+                echo "::error title=$f non pur::plugin Android ou dependance interdite"
+                echo "✗ $f : plugin Android ou dependance interdite"
+                echo "$out" | head -10 | sed 's/^/     /'
+              fi
+            fi
+          done
+          if [ -f domain/build.gradle.kts ]; then
+            out=$(grep -En -e 'project\(":core:' domain/build.gradle.kts | grep -v 'project(":core:common")' || true)
+            if [ -n "$out" ]; then
+              ERR=1
+              echo "::error title=domain depend d'un core autre que common::voir le build.gradle.kts"
+              echo "✗ domain/build.gradle.kts depend d'un core autre que common"
+              echo "$out" | sed 's/^/     /'
+            fi
+          fi
+
+          # 5. session : pas de 401 hors intercepteur central
+          scan "401 teste hors de core/network" '\b401\b' data feature
+
+          # 6. URLs en dur
+          scan "URL workers.dev en dur" 'workers\.dev' app domain data feature core/common core/session core/database core/media core/designsystem
+
+          # 7. coroutines interdites
+          scan "GlobalScope ou runBlocking" '\b(GlobalScope|runBlocking)\b' app core domain data feature
+
+          # 8. valeurs visuelles et textes en dur dans feature
+          scan_lit "couleur en dur" 'Color\(\s*(0x|[0-9])' feature
+          scan_lit "couleur nommee en dur" '\bColor\.(Red|Green|Blue|Yellow|Cyan|Magenta|White|Black|Gray|DarkGray|LightGray)\b' feature
+          scan_lit "taille de police en dur" '(fontSize|lineHeight|letterSpacing)\s*=\s*[0-9]|[0-9]\.sp\b' feature
+          scan_lit "espacement ou taille en dur" '[0-9]\.dp\b|\([0-9]+\s*\.dp\)' feature
+          scan_lit "texte en dur" '\bText\(\s*(text\s*=\s*)?"|contentDescription\s*=\s*"' feature
+
+          # 9. secrets et fichiers de cles
+          secrets=$(git grep -nIE -e '-----BEGIN [A-Z ]*PRIVATE KEY-----' -e 'AIza[0-9A-Za-z_-]{30,}' -e 'sk-[A-Za-z0-9]{32,}' -- . ':!docs' 2>/dev/null || true)
+          if [ -n "$secrets" ]; then
+            ERR=1
+            echo "::error title=Secret detecte::Un secret semble present dans le depot"
+            echo "✗ secret détecté (contenu masqué)"
+            echo "$secrets" | cut -d: -f1,2 | head -10 | sed 's/^/     /'
+          fi
+          fichiers=$(git ls-files | grep -E '\.(jks|keystore)$|(^|/)keystore\.properties$|(^|/)local\.properties$' || true)
+          if [ -n "$fichiers" ]; then
+            ERR=1
+            echo "::error title=Fichier de cles dans le depot::jks ou keystore ou local.properties"
+            echo "✗ fichier de clés ou de configuration locale versionné"
+            echo "$fichiers" | sed 's/^/     /'
+          fi
+
+          # Avertissement : !! (non bloquant)
+          nb=$(grep -rEn "${EXCL[@]}" -e '!!' app core domain data feature 2>/dev/null | wc -l || true)
+          [ "${nb:-0}" -gt 0 ] && echo "::warning title=Operateur !!::$nb occurrence(s) de !! : chacune doit etre justifiee"
+
+          if [ $ERR -ne 0 ]; then
+            echo ""
+            echo "ÉCHEC : règles d'architecture non respectées (voir docs/ARCHITECTURE.md §14 et §16)."
+            exit 1
+          fi
+          echo "✓ Toutes les règles de l'étape 1 sont respectées."
+
+  # ─────────────────────────────────────────────────────────────
+  # ÉTAPE 2 — Qualité (ktlint + detekt)
+  # ─────────────────────────────────────────────────────────────
+  qualite:
+    name: "2 · Qualité (ktlint, detekt)"
+    needs: rapides
+    if: ${{ fromJSON(needs.rapides.outputs.level) >= 2 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: gradle/actions/setup-gradle@v4
+      - name: ktlint et detekt
+        run: |
+          chmod +x gradlew
+          ./gradlew ktlintCheck detekt --continue --stacktrace
+      - name: Rapports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapports-qualite
+          path: |
+            **/build/reports/ktlint/**
+            **/build/reports/detekt/**
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────
+  # ÉTAPE 3 — Compilation (tous les modules, SANS construire d'APK)
+  # ─────────────────────────────────────────────────────────────
+  compilation:
+    name: "3 · Compilation des modules"
+    needs: [rapides, qualite]
+    if: ${{ fromJSON(needs.rapides.outputs.level) >= 3 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Compiler le Kotlin de tous les modules
+        run: |
+          chmod +x gradlew
+          ./gradlew compileKotlin compileDebugKotlin --continue --stacktrace
+
+  # ─────────────────────────────────────────────────────────────
+  # ÉTAPE 4 — Tests unitaires et tests de contrat
+  # ─────────────────────────────────────────────────────────────
+  tests:
+    name: "4 · Tests unitaires et contrats"
+    needs: [rapides, compilation]
+    if: ${{ fromJSON(needs.rapides.outputs.level) >= 4 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Tests
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest :domain:test --continue --stacktrace
+      - name: Résultats des tests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultats-tests
+          path: |
+            **/build/reports/tests/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────
+  # ÉTAPE 5 — APK debug (uniquement si tout le reste est vert)
+  # ─────────────────────────────────────────────────────────────
+  apk-debug:
+    name: "5 · APK debug"
+    needs: [rapides, tests]
+    if: ${{ fromJSON(needs.rapides.outputs.level) >= 5 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Construire l'APK debug
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug --stacktrace
+      - name: Publier l'APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: dsi-academy-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
