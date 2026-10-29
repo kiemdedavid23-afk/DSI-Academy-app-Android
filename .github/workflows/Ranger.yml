@@ -1,0 +1,175 @@
+name: Ranger les fichiers Kotlin
+
+# Se lance quand un fichier .kt arrive dans inbox/, ou à la main.
+# Chaque fichier est placé selon sa ligne « package ». Un fichier déjà rangé
+# est remplacé par la nouvelle version (c'est une mise à jour).
+#
+# Où va le fichier :
+#   - fichier de test (nom en Test.kt / Tests.kt, imports JUnit/MockK/Turbine,
+#     ou ligne « // dsi:test »)            -> app/src/test/kotlin
+#   - test d'interface (imports androidx.test, AndroidJUnit4,
+#     ou ligne « // dsi:androidTest »)     -> app/src/androidTest/kotlin
+#   - tout le reste                        -> app/src/main/kotlin
+on:
+  push:
+    paths:
+      - "inbox/*.kt"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ranger-kotlin-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ranger:
+    name: "Ranger les fichiers .kt"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Ranger chaque fichier selon son package
+        shell: bash
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -uo pipefail
+
+          BASE_MAIN="app/src/main/kotlin"
+          BASE_TEST="app/src/test/kotlin"
+          BASE_ANDROID_TEST="app/src/androidTest/kotlin"
+          RESUME="${GITHUB_STEP_SUMMARY:-/dev/null}"
+
+          # Mots réservés de Java : interdits dans un nom de paquet (Hilt génère du Java).
+          MOTS_JAVA=" abstract assert boolean break byte case catch char class const continue default do double else enum extends final finally float for goto if implements import instanceof int interface long native new package private protected public return short static strictfp super switch synchronized this throw throws transient try void volatile while true false null "
+
+          rang=0
+          erreurs=0
+
+          erreur() {
+            echo "::error file=$1::$2 Fichier laissé dans inbox/."
+            echo "- ❌ \`$(basename "$1")\` : $2" >> "$RESUME"
+            erreurs=$((erreurs + 1))
+          }
+
+          echo "### Rangement des fichiers Kotlin" >> "$RESUME"
+
+          shopt -s nullglob
+          for f in inbox/*.kt; do
+            nom="$(basename "$f")"
+
+            if ! [[ "$nom" =~ ^[A-Za-z][A-Za-z0-9_]*\.kt$ ]]; then
+              erreur "$f" "Nom de fichier invalide (lettres, chiffres et _ seulement, sans espace ni *). Supprime ou renomme-le."
+              continue
+            fi
+
+            contenu="$(tr -d '\r' < "$f")"
+
+            # Reste de collage : une ligne ``` ne doit jamais se trouver dans un fichier Kotlin.
+            if printf '%s\n' "$contenu" | grep -qE '^[[:space:]]*```'; then
+              erreur "$f" "Le fichier contient une ligne \`\`\` (reste du bloc de code collé). Recolle seulement le code."
+              continue
+            fi
+
+            paquet="$(printf '%s\n' "$contenu" | grep -m1 -E '^package[[:space:]]+' \
+              | sed -E 's/^package[[:space:]]+//; s/[[:space:]]*;?[[:space:]]*$//')"
+
+            if [ -z "$paquet" ]; then
+              erreur "$f" "Ligne 'package' introuvable."
+              continue
+            fi
+
+            # Racine du projet + premier dossier autorisé.
+            if ! [[ "$paquet" =~ ^app\.dsiacademy\.academy(\.(core|domain|data|feature|navigation|di)(\.[a-z][a-z0-9_]*)*)?$ ]]; then
+              erreur "$f" "Paquet '$paquet' invalide : il doit être app.dsiacademy.academy, ou y être suivi de core, domain, data, feature, navigation ou di (minuscules)."
+              continue
+            fi
+
+            mot_reserve=""
+            IFS='.' read -ra segments <<< "$paquet"
+            for s in "${segments[@]}"; do
+              if [[ "$MOTS_JAVA" == *" $s "* ]]; then
+                mot_reserve="$s"
+                break
+              fi
+            done
+            if [ -n "$mot_reserve" ]; then
+              erreur "$f" "Le paquet '$paquet' contient le mot réservé Java '$mot_reserve'."
+              continue
+            fi
+
+            # Choix de la destination : main, test ou androidTest.
+            base="$BASE_MAIN"
+            type="main"
+            if printf '%s\n' "$contenu" | grep -qE '^// dsi:androidTest|^import androidx\.test|AndroidJUnit4'; then
+              base="$BASE_ANDROID_TEST"
+              type="androidTest"
+            elif [[ "$nom" =~ Tests?\.kt$ ]] \
+              || printf '%s\n' "$contenu" | grep -qE '^// dsi:test|^import (org\.junit|io\.mockk|app\.cash\.turbine|kotlinx\.coroutines\.test)'; then
+              base="$BASE_TEST"
+              type="test"
+            fi
+
+            dossier="$base/$(printf '%s' "$paquet" | tr '.' '/')"
+            cible="$dossier/$nom"
+
+            # Même nom de fichier ailleurs ? (cas typique : le paquet a changé entre deux versions)
+            autres="$(find app/src -type f -name "$nom" ! -path "$cible" 2>/dev/null | tr '\n' ' ')"
+            if [ -n "$autres" ]; then
+              echo "::warning file=$f::Un fichier $nom existe déjà ailleurs : $autres. Si le paquet a changé, supprime l'ancien (sinon : classe en double)."
+              echo "- ⚠️ \`$nom\` existe aussi ailleurs : $autres" >> "$RESUME"
+            fi
+
+            # Normalise : fins de ligne LF et un seul saut de ligne final (exigé par ktlint).
+            printf '%s\n' "$contenu" > "$f"
+
+            mkdir -p "$dossier"
+            if [ -e "$cible" ]; then
+              verbe="Mis à jour"
+            else
+              verbe="Rangé"
+            fi
+            if ! mv -f "$f" "$cible"; then
+              erreur "$f" "Déplacement impossible vers $cible."
+              continue
+            fi
+            echo "$verbe ($type) : $cible"
+            echo "- ✅ $verbe ($type) : \`$cible\`" >> "$RESUME"
+            rang=$((rang + 1))
+          done
+
+          if [ "$rang" -gt 0 ]; then
+            # Garde le dossier inbox/ vivant une fois vidé.
+            mkdir -p inbox
+            [ -e inbox/.gitkeep ] || : > inbox/.gitkeep
+
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A -- app inbox
+
+            if ! git diff --cached --quiet; then
+              if ! git commit -qm "chore(kotlin): range $rang fichier(s) depuis inbox/"; then
+                echo "::error::Le commit a échoué."
+                exit 1
+              fi
+              if ! git push origin "HEAD:$BRANCH"; then
+                echo "Push refusé (la branche a bougé) : nouvelle tentative après mise à jour."
+                if ! { git pull --rebase origin "$BRANCH" && git push origin "HEAD:$BRANCH"; }; then
+                  echo "::error::Impossible de pousser le rangement. Relance le workflow."
+                  exit 1
+                fi
+              fi
+            fi
+          fi
+
+          if [ "$erreurs" -gt 0 ]; then
+            echo "$erreurs fichier(s) non rangé(s). Corrige puis relance (ou pousse un nouveau fichier)."
+            exit 1
+          fi
+          echo "Terminé : $rang fichier(s) rangé(s)."
+          echo "" >> "$RESUME"
+          echo "**$rang fichier(s) rangé(s).**" >> "$RESUME"
