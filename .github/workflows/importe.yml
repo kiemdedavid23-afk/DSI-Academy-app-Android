@@ -1,0 +1,210 @@
+name: Importer l'archive du projet
+
+# Dépose UN fichier .zip à la racine du dépôt ou dans import/ : le workflow se lance tout seul.
+# Il peut aussi être lancé à la main (Actions → « Importer l'archive du projet » → Run workflow).
+#
+# Ce qu'il fait :
+#   1. dézippe l'archive ;
+#   2. retire le dossier enveloppe (ex. DSI-Academy-app-Android-main/) s'il y en a un ;
+#   3. copie tout à la racine du dépôt, aux bons emplacements ;
+#   4. supprime le .zip du dépôt ;
+#   5. commite et pousse.
+#
+# Jamais importés (retirés ou ignorés) :
+#   .git, .github (GitHub interdit à ce workflow de modifier les workflows), import/, __MACOSX,
+#   .DS_Store, build/, .gradle/, .idea/, .kotlin/, *.iml, *.zip,
+#   et les fichiers sensibles : *.jks, *.keystore, keystore.properties, local.properties.
+#
+# Deux modes (lancement manuel) :
+#   fusion    (défaut, et seul mode du lancement automatique) : ajoute et remplace, ne supprime rien.
+#   remplacer : le dépôt devient une copie exacte de l'archive (les fichiers absents de l'archive
+#               sont supprimés), sauf .github et import/ qui restent intacts.
+on:
+  push:
+    paths:
+      - "*.zip"
+      - "import/*.zip"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "fusion (ajoute / remplace) ou remplacer (copie exacte de l'archive)"
+        type: choice
+        options:
+          - fusion
+          - remplacer
+        default: fusion
+      archive:
+        description: "Chemin du .zip (laisse vide : détection automatique à la racine ou dans import/)"
+        type: string
+        default: ""
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: importer-archive-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  importer:
+    name: "Dézipper, ranger et commiter"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Dézipper et ranger
+        shell: bash
+        env:
+          ZIP_INPUT: ${{ inputs.archive }}
+          MODE: ${{ inputs.mode || 'fusion' }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -uo pipefail
+
+          RESUME="${GITHUB_STEP_SUMMARY:-/dev/null}"
+          WORK="${RUNNER_TEMP:-/tmp}/import"
+
+          echo "### Import de l'archive" >> "$RESUME"
+
+          fail() {
+            echo "::error::$1"
+            echo "- ❌ $1" >> "$RESUME"
+            exit 1
+          }
+
+          case "$MODE" in
+            fusion|remplacer) ;;
+            *) fail "Mode inconnu : '$MODE' (attendu : fusion ou remplacer)." ;;
+          esac
+
+          # ── 1. Trouver l'archive ───────────────────────────────
+          shopt -s nullglob
+          if [ -n "${ZIP_INPUT:-}" ]; then
+            if ! [[ "$ZIP_INPUT" =~ ^[A-Za-z0-9_./-]+\.zip$ ]] || [[ "$ZIP_INPUT" == *..* ]] || [ ! -f "$ZIP_INPUT" ]; then
+              fail "Archive '$ZIP_INPUT' introuvable ou nom invalide (lettres, chiffres, _ . - / seulement)."
+            fi
+            zips=("$ZIP_INPUT")
+          else
+            zips=(./*.zip import/*.zip)
+          fi
+          if [ "${#zips[@]}" -eq 0 ]; then
+            fail "Aucun fichier .zip trouvé à la racine ni dans import/."
+          fi
+          if [ "${#zips[@]}" -gt 1 ]; then
+            fail "Plusieurs fichiers .zip trouvés (${zips[*]}) : n'en laisse qu'un seul."
+          fi
+          ZIP="${zips[0]}"
+          echo "Archive : $ZIP (mode $MODE)"
+          echo "- Archive : \`$ZIP\` — mode **$MODE**" >> "$RESUME"
+
+          # ── 2. Dézipper dans un dossier temporaire ─────────────
+          rm -rf "$WORK"
+          mkdir -p "$WORK/raw"
+          unzip -q "$ZIP" -d "$WORK/raw"
+          rc=$?
+          if [ "$rc" -gt 1 ]; then
+            fail "Archive illisible ou corrompue (code unzip $rc)."
+          fi
+          rm -rf "$WORK/raw/__MACOSX"
+          find "$WORK/raw" -name '.DS_Store' -delete
+
+          nb_liens="$(find "$WORK/raw" -type l | wc -l)"
+          if [ "$nb_liens" -gt 0 ]; then
+            find "$WORK/raw" -type l -delete
+            echo "::warning::$nb_liens lien(s) symbolique(s) ignoré(s)."
+            echo "- ⚠️ $nb_liens lien(s) symbolique(s) ignoré(s)" >> "$RESUME"
+          fi
+
+          # ── 3. Retirer le dossier enveloppe ────────────────────
+          mapfile -t tops < <(find "$WORK/raw" -mindepth 1 -maxdepth 1)
+          if [ "${#tops[@]}" -eq 0 ]; then
+            fail "L'archive est vide."
+          fi
+          SRC="$WORK/raw"
+          if [ "${#tops[@]}" -eq 1 ] && [ -d "${tops[0]}" ]; then
+            nom_top="$(basename "${tops[0]}")"
+            case "$nom_top" in
+              app|docs|gradle|build-logic|inbox|import|.github) ;;   # vrai dossier du projet : on ne le retire pas
+              *)
+                SRC="${tops[0]}"
+                echo "Dossier enveloppe retiré : $nom_top"
+                echo "- Dossier enveloppe retiré : \`$nom_top\`" >> "$RESUME"
+                ;;
+            esac
+          fi
+
+          # ── 4. Vérifier que c'est bien le projet ───────────────
+          if [ ! -d "$SRC/app" ] && [ ! -d "$SRC/docs" ] && [ ! -d "$SRC/gradle" ] && [ ! -f "$SRC/settings.gradle.kts" ]; then
+            fail "Cette archive ne ressemble pas au projet Android (ni app/, ni docs/, ni gradle/, ni settings.gradle.kts)."
+          fi
+
+          # ── 5. Fichiers sensibles et fichiers trop gros ────────
+          mapfile -t sensibles < <(find "$SRC" -type f \( -name '*.jks' -o -name '*.keystore' -o -name 'keystore.properties' -o -name 'local.properties' \))
+          for s in "${sensibles[@]}"; do
+            rm -f "$s"
+            echo "::warning::Fichier sensible non importé : ${s#"$SRC"/}"
+            echo "- ⚠️ Fichier sensible **non importé** : \`${s#"$SRC"/}\`" >> "$RESUME"
+          done
+          gros="$(find "$SRC" -type f -size +95M | head -3 | tr '\n' ' ')"
+          if [ -n "$gros" ]; then
+            fail "Fichier(s) de plus de 95 Mo (limite GitHub 100 Mo) : $gros"
+          fi
+
+          # ── 6. Copier à la racine du dépôt ─────────────────────
+          if ! command -v rsync >/dev/null 2>&1; then
+            fail "rsync est introuvable sur ce serveur."
+          fi
+          EXCL=(
+            --exclude='.git/' --exclude='.github/' --exclude='/import/'
+            --exclude='__MACOSX/' --exclude='.DS_Store'
+            --exclude='build/' --exclude='.gradle/' --exclude='.idea/' --exclude='.kotlin/'
+            --exclude='*.iml' --exclude='*.zip'
+            --exclude='local.properties' --exclude='keystore.properties'
+            --exclude='*.jks' --exclude='*.keystore'
+          )
+          OPTS=(-rlpt)
+          if [ "$MODE" = "remplacer" ]; then
+            OPTS+=(--delete)
+          fi
+          if ! rsync "${OPTS[@]}" "${EXCL[@]}" "$SRC/" ./; then
+            fail "La copie des fichiers a échoué."
+          fi
+
+          # ── 7. Supprimer le .zip, régler gradlew ───────────────
+          rm -f "$ZIP"
+          git add -A
+          if [ -f gradlew ]; then
+            git add --chmod=+x gradlew
+          fi
+
+          # ── 8. Commiter et pousser ─────────────────────────────
+          if git diff --cached --quiet; then
+            echo "Rien à changer : le dépôt contient déjà exactement ces fichiers."
+            echo "- Rien à changer." >> "$RESUME"
+            exit 0
+          fi
+
+          ajoutes="$(git diff --cached --name-status | grep -c '^A' || true)"
+          modifies="$(git diff --cached --name-status | grep -c '^M' || true)"
+          supprimes="$(git diff --cached --name-status | grep -c '^D' || true)"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git commit -qm "chore(import): importe $(basename "$ZIP") (mode $MODE)"; then
+            fail "Le commit a échoué."
+          fi
+          if ! git push origin "HEAD:$BRANCH"; then
+            echo "Push refusé (la branche a bougé) : nouvelle tentative après mise à jour."
+            if ! { git pull --rebase origin "$BRANCH" && git push origin "HEAD:$BRANCH"; }; then
+              fail "Impossible de pousser l'import. Relance le workflow."
+            fi
+          fi
+
+          echo "Import terminé : $ajoutes ajouté(s), $modifies modifié(s), $supprimes supprimé(s)."
+          {
+            echo ""
+            echo "**Import terminé sur \`$BRANCH\`** : $ajoutes fichier(s) ajouté(s), $modifies modifié(s), $supprimes supprimé(s) (le .zip lui-même compte parmi les supprimés)."
+          } >> "$RESUME"
