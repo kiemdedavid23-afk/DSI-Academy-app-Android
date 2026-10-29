@@ -1,0 +1,97 @@
+name: Créer l'arborescence DSI
+
+# Lancement MANUEL uniquement :
+#   Actions → « Créer l'arborescence DSI » → Run workflow → choisir la branche.
+#
+# Rôle : créer les dossiers de docs/ARCHITECTURE.md (§3) et placer un .gitkeep
+# dans chaque dossier vide, car Git ne versionne pas les dossiers vides.
+# Peut être relancé sans risque : un dossier qui contient déjà un fichier
+# n'est jamais modifié, et un .gitkeep déjà présent n'est jamais recréé.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: arborescence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  arborescence:
+    name: "Créer l'arborescence et commiter"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Créer les dossiers et leurs .gitkeep
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BASE="app/src/main/kotlin/app/dsiacademy/academy"
+          TEST="app/src/test/kotlin/app/dsiacademy/academy"
+          ANDROID_TEST="app/src/androidTest/kotlin/app/dsiacademy/academy"
+
+          DOSSIERS=(
+            "$BASE/navigation"
+            "$BASE/di"
+            "$BASE/core/common"
+            "$BASE/core/designsystem/theme"
+            "$BASE/core/designsystem/components"
+            "$BASE/core/designsystem/icons"
+            "$BASE/core/network"
+            "$BASE/core/session"
+            "$BASE/core/database"
+            "$BASE/core/media"
+            "$BASE/domain/member"
+            "$BASE/domain/payment"
+            "$BASE/domain/content"
+            "$BASE/domain/shop"
+            "$BASE/domain/marketplace"
+            "$BASE/domain/community"
+            "$BASE/data/member"
+            "$BASE/data/payment"
+            "$BASE/data/content"
+            "$BASE/data/shop"
+            "$BASE/data/marketplace"
+            "$BASE/data/community"
+            "$BASE/feature/public"
+            "$BASE/feature/member/login"
+            "$BASE/feature/member/profile/components"
+            "$BASE/feature/member/settings"
+            "$BASE/feature/academy"
+            "$BASE/feature/content"
+            "$BASE/feature/shop"
+            "$BASE/feature/marketplace"
+            "$BASE/feature/community"
+            "$BASE/feature/assistant"
+            "app/src/main/res/values"
+            "app/src/main/res/values-en"
+            "app/src/main/res/font"
+            "$TEST"
+            "$ANDROID_TEST"
+            "docs/TACHES"
+          )
+
+          for d in "${DOSSIERS[@]}"; do
+            mkdir -p "$d"
+            # Un dossier qui contient déjà quelque chose n'a pas besoin de .gitkeep
+            if [ -z "$(ls -A "$d")" ]; then
+              touch "$d/.gitkeep"
+              echo "Créé : $d/.gitkeep"
+            fi
+          done
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Arborescence déjà en place : rien à commiter."
+            exit 0
+          fi
+          git commit -qm "Crée l'arborescence DSI (paquets app.dsiacademy.academy)"
+          git push
