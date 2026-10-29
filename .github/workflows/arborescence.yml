@@ -1,130 +1,65 @@
-name: Création de l'arborescence
+name: Nettoyer l'ancienne arborescence
 
-# Lancement MANUEL uniquement :
-#   Actions → « Création de l'arborescence » → Run workflow → choisir la branche.
-#
-# Rôle : créer les dossiers de docs/ARCHITECTURE.md (§3) et placer dans CHAQUE dossier
-# un fichier README.md contenant « DSI » (Git ne versionne pas les dossiers vides).
-# Peut être relancé sans risque : un README.md déjà présent n'est jamais écrasé.
+# Lancement MANUEL uniquement. Il faut taper SUPPRIMER pour confirmer.
 on:
   workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Tape SUPPRIMER pour confirmer"
+        required: true
+        type: string
 
-# Droit d'écriture nécessaire pour pousser le commit.
 permissions:
   contents: write
 
 concurrency:
-  group: arborescence-${{ github.ref }}
+  group: nettoyage-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  arborescence:
-    name: "Créer l'arborescence et commiter"
+  nettoyer:
+    name: "Supprimer l'ancienne arborescence"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Vérifier la confirmation
+        if: ${{ inputs.confirmation != 'SUPPRIMER' }}
+        run: |
+          echo "Confirmation incorrecte : rien n'a été supprimé."
+          exit 1
+
       - name: Récupérer le code
         uses: actions/checkout@v4
 
-      - name: Créer les dossiers et leurs README
+      - name: Supprimer les placeholders, les anciens modules et le workflow de création
         shell: bash
-        env:
-          README_TEXT: "DSI"
         run: |
           set -euo pipefail
 
-          BASE="bf/dsi/academy"
-
-          # placer CHEMIN : crée le dossier et tous ses parents,
-          # et met un README.md dans chacun s'il n'en a pas déjà un.
-          placer() {
-            local chemin="$1" cumul="" seg
-            local -a segs
-            IFS='/' read -ra segs <<< "$chemin"
-            for seg in "${segs[@]}"; do
-              cumul="${cumul:+$cumul/}$seg"
-              mkdir -p "$cumul"
-              if [ ! -f "$cumul/README.md" ]; then
-                printf '%s\n' "$README_TEXT" > "$cumul/README.md"
+          # 1. Supprime uniquement les README.md dont le contenu est exactement « DSI ».
+          #    Un README avec du vrai contenu n'est jamais touché.
+          find . -path ./.git -prune -o -type f -name README.md -print0 |
+            while IFS= read -r -d '' f; do
+              if [ "$(tr -d '\r\n' < "$f")" = "DSI" ]; then
+                git rm -q "$f"
               fi
             done
-          }
 
-          # ── build-logic ─────────────────────────────────────────
-          placer "build-logic/src/main/kotlin"
-
-          # ── app ─────────────────────────────────────────────────
-          placer "app/src/main/kotlin/$BASE/app/di"
-          placer "app/src/main/kotlin/$BASE/app/navigation"
-          placer "app/src/main/res"
-
-          # ── core ────────────────────────────────────────────────
-          for m in designsystem network session database media common testing; do
-            placer "core/$m/src/main/kotlin/$BASE/core/$m"
-          done
-          for s in theme components icons; do
-            placer "core/designsystem/src/main/kotlin/$BASE/core/designsystem/$s"
-          done
-          placer "core/designsystem/src/main/res/font"
-          placer "core/network/src/main/kotlin/$BASE/core/network/interceptors"
-          for m in network session common; do
-            placer "core/$m/src/test/kotlin/$BASE/core/$m"
+          # 2. Supprime les anciens modules s'ils ne contiennent plus rien.
+          #    Si un vrai fichier reste dedans, le dossier est conservé.
+          for d in core data domain feature build-logic app/src/main/kotlin/bf; do
+            [ -d "$d" ] && find "$d" -type d -empty -delete
           done
 
-          # ── domain ──────────────────────────────────────────────
-          for s in model repository usecase; do
-            placer "domain/src/main/kotlin/$BASE/domain/$s"
-          done
-          placer "domain/src/test/kotlin/$BASE/domain"
+          # 3. Supprime le workflow qui recréait l'ancienne arborescence.
+          [ -f .github/workflows/arborescence.yml ] && git rm -q .github/workflows/arborescence.yml || true
 
-          # ── data ────────────────────────────────────────────────
-          for d in payment content shop marketplace community; do
-            for s in api dto mapper local; do
-              placer "data/$d/src/main/kotlin/$BASE/data/$d/$s"
-            done
-            placer "data/$d/src/test/kotlin/$BASE/data/$d"
-          done
-
-          # ── feature ─────────────────────────────────────────────
-          # Le module Gradle « public » garde son nom, mais « public » est un mot réservé
-          # de Java : le dossier du paquet Kotlin s'appelle donc « publicarea ».
-          for f in public member academy content shop marketplace community assistant; do
-            pkg="$f"
-            if [ "$f" = "public" ]; then
-              pkg="publicarea"
-            fi
-            for s in ui viewmodel state navigation; do
-              placer "feature/$f/src/main/kotlin/$BASE/feature/$pkg/$s"
-            done
-            placer "feature/$f/src/test/kotlin/$BASE/feature/$pkg"
-          done
-
-          echo "Dossiers présents :"
-          find app core domain data feature build-logic -type d | wc -l
-
-      - name: Commiter et pousser
-        env:
-          BRANCH: ${{ github.ref_name }}
-        run: |
-          set -euo pipefail
+          # 4. Commit uniquement s'il y a des changements.
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add -A -- app core domain data feature build-logic
-
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           if git diff --cached --quiet; then
-            echo "L'arborescence est déjà complète : aucun commit créé."
-            echo "Arborescence : déjà complète, aucun commit." >> "$GITHUB_STEP_SUMMARY"
+            echo "Rien à supprimer."
             exit 0
           fi
-
-          NB="$(git diff --cached --name-only | wc -l)"
-          git commit -m "chore(structure): création de l'arborescence du projet"
-
-          if ! git push origin "HEAD:$BRANCH"; then
-            echo "Push refusé (la branche a bougé) : nouvelle tentative après mise à jour."
-            git pull --rebase origin "$BRANCH"
-            git push origin "HEAD:$BRANCH"
-          fi
-
-          echo "### Arborescence commitée sur \`$BRANCH\` : $NB fichiers README.md ajoutés" >> "$GITHUB_STEP_SUMMARY"
+          git commit -qm "Supprime l'ancienne arborescence (placeholders README)"
+          git push
