@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DSI Academy</string>
+
+    <string name="loading">Loading…</string>
+    <string name="retry">Retry</string>
+    <string name="error_network">Check your connection and try again.</string>
+    <string name="error_generic">Something went wrong. Please try again later.</string>
+    <string name="empty_state">Nothing here yet.</string>
+
+    <string name="login_title">Sign in</string>
+    <string name="login_email">Email or WhatsApp</string>
+    <string name="login_password">Password</string>
+    <string name="login_button">Sign in</string>
+    <string name="login_souvenir">Remember me</string>
+    <string name="login_forgot">Forgot password?</string>
+    <string name="login_no_account">Don\'t have an account?</string>
+    <string name="login_register">Sign up</string>
+</resources>

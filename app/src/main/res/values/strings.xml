@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DSI Academy</string>
+
+    <string name="loading">Chargement…</string>
+    <string name="retry">Réessayer</string>
+    <string name="error_network">Vérifiez votre connexion et réessayez.</string>
+    <string name="error_generic">Une erreur est survenue. Réessayez plus tard.</string>
+    <string name="empty_state">Aucun élément pour le moment.</string>
+
+    <!-- Connexion — textes du site (fr.json / ConnexionScreen) -->
+    <string name="login_title">Connexion</string>
+    <string name="login_eyebrow">Espace membre</string>
+    <string name="login_heading">Bon retour</string>
+    <string name="login_sub">Connectez-vous pour accéder à vos formations, votre bibliothèque et votre solde DSI.</string>
+    <string name="login_id_label">Email ou numéro WhatsApp</string>
+    <string name="login_id_placeholder">vous@exemple.com</string>
+    <string name="login_id_error">Renseignez votre email ou votre numéro WhatsApp.</string>
+    <string name="login_password_label">Mot de passe</string>
+    <string name="login_password_error">Renseignez votre mot de passe.</string>
+    <string name="login_show_password">Afficher le mot de passe</string>
+    <string name="login_remember_me">Se souvenir de moi</string>
+    <string name="login_forgot_password">Mot de passe oublié ?</string>
+    <string name="login_submit">Se connecter</string>
+    <string name="login_submitting">Connexion…</string>
+    <string name="login_error_generic">Identifiant ou mot de passe incorrect.</string>
+    <string name="login_no_account">Pas encore de compte ?</string>
+    <string name="login_create_account">Créer un compte</string>
+
+    <!-- Inscription — textes du site -->
+    <string name="register_eyebrow">Inscription</string>
+    <string name="register_step_nom">Quel est votre nom ?</string>
+    <string name="register_step_prenom">Et votre prénom ?</string>
+    <string name="register_step_pays">Dans quel pays êtes-vous ?</string>
+    <string name="register_step_whatsapp">Quel est votre numéro WhatsApp ?</string>
+    <string name="register_step_email">Avez-vous un email à ajouter ? (facultatif)</string>
+    <string name="register_step_mdp">Créez un mot de passe (8 caractères minimum).</string>
+    <string name="register_step_mdp2">Confirmez votre mot de passe.</string>
+    <string name="register_field_error">Merci de compléter ce champ correctement.</string>
+    <string name="register_password_mismatch">Les mots de passe ne correspondent pas.</string>
+    <string name="register_next">Suivant</string>
+    <string name="register_skip">Passer</string>
+    <string name="register_already">Déjà un compte ?</string>
+    <string name="register_go_login">Se connecter</string>
+    <string name="register_payment_title">Activation de votre accès</string>
+    <string name="register_payment_hint">Merci ! Votre compte est presque prêt. Il reste uniquement l\'activation de votre accès.</string>
+    <string name="register_payment_open">Ouvrir le paiement</string>
+    <string name="register_payment_check">J\'ai payé — vérifier</string>
+    <string name="register_payment_pending">⏳ Paiement en attente. Nous vous préviendrons dès sa confirmation.</string>
+    <string name="register_payment_failed">❌ Paiement non confirmé.</string>
+</resources>

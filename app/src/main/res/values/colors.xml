@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tokens extraits de global.css du site (charte v3.0) — pour le thème système uniquement -->
+    <color name="bg_app">#F8FAFC</color>
+    <color name="bg_surface">#FFFFFF</color>
+    <color name="text_primary">#0F172A</color>
+    <color name="gold_prestige">#D4AF37</color>
+    <color name="blue_primary">#1E40AF</color>
+</resources>
