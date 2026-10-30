@@ -16,4 +16,13 @@
     <string name="login_forgot">Forgot password?</string>
     <string name="login_no_account">Don\'t have an account?</string>
     <string name="login_register">Sign up</string>
+
+    <!-- Integrated browser -->
+    <string name="browser_close">Close</string>
+    <string name="browser_reload">Reload</string>
+    <string name="browser_secure_connection">Secure connection</string>
+    <string name="browser_not_configured_title">This page is not available yet</string>
+    <string name="browser_not_configured_body">This feature will be available soon.</string>
+    <string name="browser_unknown_link_body">This link is not available.</string>
+    <string name="browser_no_app_found">No app available to open this link.</string>
 </resources>
