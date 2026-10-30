@@ -4,8 +4,8 @@ object Routes {
     const val SPLASH = "splash"
     const val WELCOME = "welcome"
     const val LOGIN = "login"
-    const val REGISTER_BASE = "register"
     const val FORGOT_PASSWORD = "forgot-password"
+    const val PENDING_PAYMENT = "pending-payment"
     const val MEMBER_HOME = "member/home"
     const val MEMBER_SUBSCRIPTION = "member/subscription"
     const val MEMBER_DSI = "member/dsi"
@@ -26,9 +26,6 @@ object Routes {
 
     fun browser(linkId: String, ref: String? = null): String =
         if (ref.isNullOrBlank()) "browser/$linkId" else "browser/$linkId?ref=$ref"
-
-    fun register(ref: String? = null): String =
-        if (ref.isNullOrBlank()) "register" else "register?ref=$ref"
 
     fun contentDetail(contentId: String, title: String, type: String): String {
         val encoded = android.net.Uri.encode(title)

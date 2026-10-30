@@ -13,7 +13,7 @@ import app.dsiacademy.academy.core.config.SiteLink
 import app.dsiacademy.academy.feature.browser.BrowserScreen
 import app.dsiacademy.academy.feature.member.login.ForgotPasswordScreen
 import app.dsiacademy.academy.feature.member.login.LoginScreen
-import app.dsiacademy.academy.feature.member.register.RegisterScreen
+import app.dsiacademy.academy.feature.member.pendingpayment.PendingPaymentScreen
 import app.dsiacademy.academy.feature.public.SplashScreen
 import app.dsiacademy.academy.feature.public.WelcomeScreen
 
@@ -58,33 +58,9 @@ fun NavGraphBuilder.publicNavGraph(
             },
             onNavigateForgotPassword = { navController.navigate(Routes.FORGOT_PASSWORD) },
             onNavigateInscriptionPaiement = { _, _, _ ->
-                navController.navigate(Routes.register())
+                navController.navigate(Routes.PENDING_PAYMENT)
             },
         )
-    }
-
-    composable(
-        route = "register?ref={ref}",
-        arguments = listOf(
-            navArgument("ref") {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            },
-        ),
-    ) { entry ->
-        RegisterScreen(
-            codeParrain = entry.arguments?.getString("ref"),
-            onNavigateLogin = {
-                navController.navigate(Routes.LOGIN) {
-                    popUpTo(Routes.WELCOME) { inclusive = false }
-                }
-            },
-        )
-    }
-
-    composable(Routes.REGISTER_BASE) {
-        RegisterScreen(onNavigateLogin = { navController.navigate(Routes.LOGIN) })
     }
 
     composable(Routes.FORGOT_PASSWORD) {
@@ -94,6 +70,16 @@ fun NavGraphBuilder.publicNavGraph(
                 navController.navigate(Routes.WELCOME) {
                     popUpTo(Routes.WELCOME) { inclusive = false }
                 }
+            },
+        )
+    }
+
+    composable(Routes.PENDING_PAYMENT) {
+        val context = LocalContext.current
+        PendingPaymentScreen(
+            onBack = { navController.popBackStack() },
+            onPaid = {
+                navigateToLoginAfterPaymentSuccess(navController, context)
             },
         )
     }
@@ -119,11 +105,31 @@ fun NavGraphBuilder.publicNavGraph(
                     PaymentReturnStatus.Unknown -> R.string.payment_return_pending
                 }
                 Toast.makeText(context, context.getString(messageRes), Toast.LENGTH_LONG).show()
-                navController.navigate(Routes.LOGIN) {
-                    popUpTo(Routes.WELCOME) { inclusive = false }
-                    launchSingleTop = true
-                }
+                navigateToLoginAfterPaymentSuccess(navController, context)
             },
         )
+    }
+}
+
+/**
+ * Toast de succès + pile [Welcome, Login].
+ * Utilisé après paiement confirmé (navigateur ou écran pending-payment).
+ */
+private fun navigateToLoginAfterPaymentSuccess(
+    navController: NavHostController,
+    context: android.content.Context,
+) {
+    // Toast déjà affiché par l'appelant pour le navigateur ;
+    // pour PendingPayment onPaid, on affiche le succès ici.
+    if (navController.currentDestination?.route == Routes.PENDING_PAYMENT) {
+        Toast.makeText(
+            context,
+            context.getString(R.string.payment_return_success),
+            Toast.LENGTH_LONG,
+        ).show()
+    }
+    navController.navigate(Routes.LOGIN) {
+        popUpTo(Routes.WELCOME) { inclusive = false }
+        launchSingleTop = true
     }
 }
