@@ -1,10 +1,15 @@
 package app.dsiacademy.academy.navigation
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import app.dsiacademy.academy.R
+import app.dsiacademy.academy.core.common.PaymentReturnStatus
+import app.dsiacademy.academy.core.config.SiteLink
 import app.dsiacademy.academy.feature.browser.BrowserScreen
 import app.dsiacademy.academy.feature.member.login.ForgotPasswordScreen
 import app.dsiacademy.academy.feature.member.login.LoginScreen
@@ -35,7 +40,9 @@ fun NavGraphBuilder.publicNavGraph(
     composable(Routes.WELCOME) {
         WelcomeScreen(
             onLogin = { navController.navigate(Routes.LOGIN) },
-            onRegister = { navController.navigate(Routes.register()) },
+            onRegister = {
+                navController.navigate(Routes.browser(SiteLink.INSCRIPTION.id))
+            },
         )
     }
 
@@ -46,7 +53,9 @@ fun NavGraphBuilder.publicNavGraph(
                     popUpTo(0) { inclusive = true }
                 }
             },
-            onNavigateRegister = { navController.navigate(Routes.register()) },
+            onNavigateRegister = {
+                navController.navigate(Routes.browser(SiteLink.INSCRIPTION.id))
+            },
             onNavigateForgotPassword = { navController.navigate(Routes.FORGOT_PASSWORD) },
             onNavigateInscriptionPaiement = { _, _, _ ->
                 navController.navigate(Routes.register())
@@ -100,16 +109,20 @@ fun NavGraphBuilder.publicNavGraph(
             },
         ),
     ) {
+        val context = LocalContext.current
         BrowserScreen(
             onClose = { navController.popBackStack() },
-            onPaymentReturn = { status, token ->
-                navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.set("browser_payment_status", status.name)
-                navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.set("browser_payment_token", token)
-                navController.popBackStack()
+            onPaymentReturn = { status, _ ->
+                val messageRes = when (status) {
+                    PaymentReturnStatus.Success -> R.string.payment_return_success
+                    PaymentReturnStatus.Failed -> R.string.payment_return_error
+                    PaymentReturnStatus.Unknown -> R.string.payment_return_pending
+                }
+                Toast.makeText(context, context.getString(messageRes), Toast.LENGTH_LONG).show()
+                navController.navigate(Routes.LOGIN) {
+                    popUpTo(Routes.WELCOME) { inclusive = false }
+                    launchSingleTop = true
+                }
             },
         )
     }
