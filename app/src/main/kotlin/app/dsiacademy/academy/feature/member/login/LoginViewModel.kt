@@ -3,12 +3,15 @@ package app.dsiacademy.academy.feature.member.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.dsiacademy.academy.core.common.DsiResult
+import app.dsiacademy.academy.core.session.InscriptionDraft
+import app.dsiacademy.academy.core.session.InscriptionDraftStore
 import app.dsiacademy.academy.core.session.MemberSession
 import app.dsiacademy.academy.core.session.SessionStore
 import app.dsiacademy.academy.domain.member.AuthRepository
 import app.dsiacademy.academy.domain.member.LoginSuccess
 import app.dsiacademy.academy.domain.member.PendingPayment
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +19,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class LoginUiState(
     val identifiant: String = "",
@@ -55,6 +57,7 @@ sealed interface LoginUiAction {
 class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val sessionStore: SessionStore,
+    private val draftStore: InscriptionDraftStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginUiState())
@@ -123,13 +126,21 @@ class LoginViewModel @Inject constructor(
                             _events.send(LoginUiEvent.NavigateMemberHome)
                         }
                         is PendingPayment -> {
+                            draftStore.saveDraft(
+                                InscriptionDraft(
+                                    userId = data.userId,
+                                    paymentTrackingToken = data.paymentTrackingToken,
+                                    paymentUrl = data.paymentUrl,
+                                    etape = "paiement",
+                                ),
+                            )
                             _state.update { it.copy(chargement = false) }
                             _events.send(
                                 LoginUiEvent.NavigateInscriptionPaiement(
                                     userId = data.userId,
                                     paymentTrackingToken = data.paymentTrackingToken,
                                     paymentUrl = data.paymentUrl,
-                                )
+                                ),
                             )
                         }
                         else -> {
