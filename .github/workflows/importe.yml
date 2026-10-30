@@ -1,31 +1,35 @@
 name: Importer l'archive du projet
 
-# Dépose UN fichier .zip à la racine du dépôt ou dans import/ : le workflow se lance tout seul.
-# Il peut aussi être lancé à la main (Actions → « Importer l'archive du projet » → Run workflow).
+# Mode d'emploi :
+#   1. Sur GitHub : Releases → Draft a new release → crée un tag (ex. import-1)
+#      → joins ton fichier .zip → Publish release (PAS en brouillon).
+#   2. Copie le lien du fichier .zip dans la Release (appui long → copier l'adresse du lien).
+#      Il ressemble à : https://github.com/PROPRIETAIRE/DEPOT/releases/download/import-1/projet.zip
+#   3. Actions → « Importer l'archive du projet » → Run workflow → colle le lien → Run.
 #
 # Ce qu'il fait :
-#   1. dézippe l'archive ;
-#   2. retire le dossier enveloppe (ex. DSI-Academy-app-Android-main/) s'il y en a un ;
-#   3. copie tout à la racine du dépôt, aux bons emplacements ;
-#   4. supprime le .zip du dépôt ;
+#   1. télécharge l'archive depuis la Release de CE dépôt (les autres adresses sont refusées) ;
+#   2. dézippe ;
+#   3. retire le dossier enveloppe (ex. DSI-Academy-app-Android-main/) s'il y en a un ;
+#   4. copie tout à la racine du dépôt, aux bons emplacements ;
 #   5. commite et pousse.
 #
 # Jamais importés (retirés ou ignorés) :
 #   .git, .github (GitHub interdit à ce workflow de modifier les workflows), import/, __MACOSX,
-#   .DS_Store, build/, .gradle/, .idea/, .kotlin/, *.iml, *.zip,
+#   .DS_Store, dossiers build/, .gradle/, .idea/, .kotlin/, fichiers *.iml et *.zip,
 #   et les fichiers sensibles : *.jks, *.keystore, keystore.properties, local.properties.
 #
-# Deux modes (lancement manuel) :
-#   fusion    (défaut, et seul mode du lancement automatique) : ajoute et remplace, ne supprime rien.
+# Deux modes :
+#   fusion    (défaut) : ajoute et remplace, ne supprime rien.
 #   remplacer : le dépôt devient une copie exacte de l'archive (les fichiers absents de l'archive
 #               sont supprimés), sauf .github et import/ qui restent intacts.
 on:
-  push:
-    paths:
-      - "*.zip"
-      - "import/*.zip"
   workflow_dispatch:
     inputs:
+      lien:
+        description: "https://github.com/kiemdedavid23-afk/DSI-Academy-app-Android/releases/download/Bo/DSI-Academy-Android-COMPLET.zip"
+        type: string
+        required: true
       mode:
         description: "fusion (ajoute / remplace) ou remplacer (copie exacte de l'archive)"
         type: choice
@@ -33,11 +37,6 @@ on:
           - fusion
           - remplacer
         default: fusion
-      archive:
-        description: "Chemin du .zip (laisse vide : détection automatique à la racine ou dans import/)"
-        type: string
-        default: ""
-        required: false
 
 permissions:
   contents: write
@@ -58,9 +57,11 @@ jobs:
       - name: Dézipper et ranger
         shell: bash
         env:
-          ZIP_INPUT: ${{ inputs.archive }}
+          LIEN: ${{ inputs.lien }}
           MODE: ${{ inputs.mode || 'fusion' }}
           BRANCH: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -uo pipefail
 
@@ -80,28 +81,32 @@ jobs:
             *) fail "Mode inconnu : '$MODE' (attendu : fusion ou remplacer)." ;;
           esac
 
-          # ── 1. Trouver l'archive ───────────────────────────────
-          shopt -s nullglob
-          if [ -n "${ZIP_INPUT:-}" ]; then
-            if ! [[ "$ZIP_INPUT" =~ ^[A-Za-z0-9_./-]+\.zip$ ]] || [[ "$ZIP_INPUT" == *..* ]] || [ ! -f "$ZIP_INPUT" ]; then
-              fail "Archive '$ZIP_INPUT' introuvable ou nom invalide (lettres, chiffres, _ . - / seulement)."
-            fi
-            zips=("$ZIP_INPUT")
-          else
-            zips=(./*.zip import/*.zip)
+          # ── 1. Télécharger l'archive depuis la Release ─────────
+          LIEN="$(printf '%s' "$LIEN" | tr -d '[:space:]')"
+          PREFIXE="https://github.com/${REPO}/releases/download/"
+          if [[ "${LIEN,,}" != "${PREFIXE,,}"* ]]; then
+            fail "Le lien doit commencer par ${PREFIXE} (une Release de CE dépôt)."
           fi
-          if [ "${#zips[@]}" -eq 0 ]; then
-            fail "Aucun fichier .zip trouvé à la racine ni dans import/."
+          reste="${LIEN:${#PREFIXE}}"
+          if ! [[ "$reste" =~ ^([A-Za-z0-9._-]+)/([A-Za-z0-9._-]+\.zip)$ ]]; then
+            fail "Lien invalide : attendu ${PREFIXE}<tag>/<fichier>.zip (tag et nom de fichier : lettres, chiffres, . _ - seulement)."
           fi
-          if [ "${#zips[@]}" -gt 1 ]; then
-            fail "Plusieurs fichiers .zip trouvés (${zips[*]}) : n'en laisse qu'un seul."
+          TAG="${BASH_REMATCH[1]}"
+          FICHIER="${BASH_REMATCH[2]}"
+
+          mkdir -p "$WORK/dl"
+          if ! gh release download "$TAG" --repo "$REPO" --pattern "$FICHIER" --dir "$WORK/dl" --clobber; then
+            fail "Téléchargement impossible : vérifie que la Release « $TAG » est PUBLIÉE (pas en brouillon) et que le fichier $FICHIER y est joint."
           fi
-          ZIP="${zips[0]}"
-          echo "Archive : $ZIP (mode $MODE)"
-          echo "- Archive : \`$ZIP\` — mode **$MODE**" >> "$RESUME"
+          ZIP="$WORK/dl/$FICHIER"
+          if [ ! -s "$ZIP" ]; then
+            fail "Le fichier téléchargé est vide ou absent."
+          fi
+          echo "Archive : $FICHIER (Release $TAG, mode $MODE)"
+          echo "- Archive : \`$FICHIER\` (Release \`$TAG\`) — mode **$MODE**" >> "$RESUME"
 
           # ── 2. Dézipper dans un dossier temporaire ─────────────
-          rm -rf "$WORK"
+          rm -rf "$WORK/raw"
           mkdir -p "$WORK/raw"
           unzip -q "$ZIP" -d "$WORK/raw"
           rc=$?
@@ -154,27 +159,35 @@ jobs:
           fi
 
           # ── 6. Copier à la racine du dépôt ─────────────────────
-          if ! command -v rsync >/dev/null 2>&1; then
-            fail "rsync est introuvable sur ce serveur."
+          # D'abord on retire de la copie temporaire tout ce qui ne doit jamais être importé.
+          if [ -d "$SRC/.github" ]; then
+            echo "::warning::.github/ de l'archive ignoré (GitHub interdit à ce workflow de toucher aux workflows : ajoute-les à la main)."
+            echo "- ⚠️ \`.github/\` de l'archive **ignoré** : ajoute les workflows à la main" >> "$RESUME"
           fi
-          EXCL=(
-            --exclude='.git/' --exclude='.github/' --exclude='/import/'
-            --exclude='__MACOSX/' --exclude='.DS_Store'
-            --exclude='build/' --exclude='.gradle/' --exclude='.idea/' --exclude='.kotlin/'
-            --exclude='*.iml' --exclude='*.zip'
-            --exclude='local.properties' --exclude='keystore.properties'
-            --exclude='*.jks' --exclude='*.keystore'
-          )
-          OPTS=(-rlpt)
+          rm -rf "$SRC/.git" "$SRC/.github" "$SRC/import"
+          find "$SRC" -type d \( -name build -o -name .gradle -o -name .idea -o -name .kotlin -o -name __MACOSX \) -prune -exec rm -rf {} +
+          find "$SRC" -type f \( -name '*.iml' -o -name '*.zip' -o -name '.DS_Store' \) -delete
+
+          # Mode remplacer : on supprime du dépôt les fichiers suivis qui ne sont plus dans l'archive
+          # (.github et import/ sont protégés).
           if [ "$MODE" = "remplacer" ]; then
-            OPTS+=(--delete)
+            while IFS= read -r -d '' f; do
+              case "$f" in
+                .github/*|import/*) continue ;;
+              esac
+              if [ ! -e "$SRC/$f" ]; then
+                rm -f -- "$f"
+              fi
+            done < <(git ls-files -z)
+            find . -mindepth 1 -type d -empty -not -path './.git/*' -not -path './.git' -delete
           fi
-          if ! rsync "${OPTS[@]}" "${EXCL[@]}" "$SRC/" ./; then
+
+          # Copie : les dossiers sont fusionnés, les fichiers de même chemin sont remplacés.
+          if ! cp -a "$SRC"/. ./; then
             fail "La copie des fichiers a échoué."
           fi
 
-          # ── 7. Supprimer le .zip, régler gradlew ───────────────
-          rm -f "$ZIP"
+          # ── 7. Préparer le commit, régler gradlew ──────────────
           git add -A
           if [ -f gradlew ]; then
             git add --chmod=+x gradlew
@@ -206,5 +219,5 @@ jobs:
           echo "Import terminé : $ajoutes ajouté(s), $modifies modifié(s), $supprimes supprimé(s)."
           {
             echo ""
-            echo "**Import terminé sur \`$BRANCH\`** : $ajoutes fichier(s) ajouté(s), $modifies modifié(s), $supprimes supprimé(s) (le .zip lui-même compte parmi les supprimés)."
+            echo "**Import terminé sur \`$BRANCH\`** : $ajoutes fichier(s) ajouté(s), $modifies modifié(s), $supprimes supprimé(s)."
           } >> "$RESUME"
