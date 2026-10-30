@@ -45,6 +45,7 @@ import app.dsiacademy.academy.feature.member.referral.ReferralScreen
 import app.dsiacademy.academy.feature.member.login.ForgotPasswordScreen
 import app.dsiacademy.academy.feature.member.login.LoginScreen
 import app.dsiacademy.academy.feature.member.register.RegisterScreen
+import app.dsiacademy.academy.feature.browser.BrowserScreen
 import app.dsiacademy.academy.feature.member.shell.MemberShell
 import app.dsiacademy.academy.feature.public.SplashScreen
 import app.dsiacademy.academy.feature.public.WelcomeScreen
@@ -73,6 +74,10 @@ object Routes {
     const val HOUSE_CATALOG = "house/catalog/{type}?title={title}"
     const val HOUSE_SHOP = "house/shop"
     const val HOUSE_MARKETPLACE = "house/marketplace"
+    const val BROWSER = "browser/{linkId}?ref={ref}"
+
+    fun browser(linkId: String, ref: String? = null): String =
+        if (ref.isNullOrBlank()) "browser/$linkId" else "browser/$linkId?ref=$ref"
 
     fun register(ref: String? = null): String =
         if (ref.isNullOrBlank()) "register" else "register?ref=$ref"
@@ -246,6 +251,31 @@ fun DsiNavHost(
                     }
                 }
             }
+        }
+
+        composable(
+            route = Routes.BROWSER,
+            arguments = listOf(
+                navArgument("linkId") { type = NavType.StringType },
+                navArgument("ref") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) {
+            BrowserScreen(
+                onClose = { navController.popBackStack() },
+                onPaymentReturn = { status, token ->
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("browser_payment_status", status.name)
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("browser_payment_token", token)
+                    navController.popBackStack()
+                },
+            )
         }
     }
 }
