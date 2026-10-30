@@ -7,6 +7,15 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+// À MODIFIER : adresse du site, ex. "https://monsite.com" (ou variable GitHub DSI_SITE_URL)
+val dsiSiteUrlRaw: String = System.getenv("DSI_SITE_URL") ?: ""
+val dsiSiteUrl: String = dsiSiteUrlRaw.trim().trimEnd('/')
+if (dsiSiteUrl.isNotEmpty() && !dsiSiteUrl.startsWith("https://")) {
+    throw GradleException(
+        "SITE_URL invalide : doit commencer par « https:// » (valeur reçue : « $dsiSiteUrl »)."
+    )
+}
+
 android {
     namespace = "app.dsiacademy.academy"
     compileSdk = 35
@@ -27,6 +36,9 @@ android {
         buildConfigField("String", "MARKETPLACE_WORKER_URL", "\"https://dsi-worker-marketplace.raza-9-ck2261.workers.dev\"")
         buildConfigField("String", "COMMUNITY_WORKER_URL", "\"https://dsi-worker-community.dave2-kiemde2517.workers.dev\"")
         buildConfigField("String", "ADMIN_WORKER_URL", "\"https://dsi-worker-admin.kiemdedavid23.workers.dev\"")
+
+        // Adresse du site (WebView inscription, etc.)
+        buildConfigField("String", "SITE_URL", "\"$dsiSiteUrl\"")
     }
 
     buildTypes {
