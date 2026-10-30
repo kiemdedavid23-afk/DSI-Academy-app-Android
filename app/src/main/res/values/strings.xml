@@ -48,4 +48,13 @@
     <string name="register_payment_check">J\'ai payé — vérifier</string>
     <string name="register_payment_pending">⏳ Paiement en attente. Nous vous préviendrons dès sa confirmation.</string>
     <string name="register_payment_failed">❌ Paiement non confirmé.</string>
+
+    <!-- Navigateur intégré -->
+    <string name="browser_close">Fermer</string>
+    <string name="browser_reload">Actualiser</string>
+    <string name="browser_secure_connection">Connexion sécurisée</string>
+    <string name="browser_not_configured_title">Page indisponible pour le moment</string>
+    <string name="browser_not_configured_body">Cette fonctionnalité sera bientôt disponible.</string>
+    <string name="browser_unknown_link_body">Ce lien n\'est pas disponible.</string>
+    <string name="browser_no_app_found">Aucune application disponible pour ouvrir ce lien.</string>
 </resources>
