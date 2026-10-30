@@ -57,4 +57,9 @@
     <string name="browser_not_configured_body">Cette fonctionnalité sera bientôt disponible.</string>
     <string name="browser_unknown_link_body">Ce lien n\'est pas disponible.</string>
     <string name="browser_no_app_found">Aucune application disponible pour ouvrir ce lien.</string>
+
+    <!-- Retour de paiement (textes du site paymentReturn) -->
+    <string name="payment_return_success">Paiement confirmé. Vous pouvez vous connecter à votre espace membre.</string>
+    <string name="payment_return_pending">Paiement encore en cours de confirmation. Actualisez dans quelques instants ou reconnectez-vous plus tard.</string>
+    <string name="payment_return_error">Le paiement n’a pas pu être confirmé. Vous pouvez reprendre l’inscription ou contacter le support.</string>
 </resources>
