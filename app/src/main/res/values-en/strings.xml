@@ -25,4 +25,9 @@
     <string name="browser_not_configured_body">This feature will be available soon.</string>
     <string name="browser_unknown_link_body">This link is not available.</string>
     <string name="browser_no_app_found">No app available to open this link.</string>
+
+    <!-- Payment return (site paymentReturn texts) -->
+    <string name="payment_return_success">Payment confirmed. You can sign in to your member space.</string>
+    <string name="payment_return_pending">Payment still being confirmed. Refresh shortly or sign in later.</string>
+    <string name="payment_return_error">Payment could not be confirmed. You may resume registration or contact support.</string>
 </resources>
