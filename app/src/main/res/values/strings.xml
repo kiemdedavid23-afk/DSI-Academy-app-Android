@@ -62,4 +62,8 @@
     <string name="payment_return_success">Paiement confirmé. Vous pouvez vous connecter à votre espace membre.</string>
     <string name="payment_return_pending">Paiement encore en cours de confirmation. Actualisez dans quelques instants ou reconnectez-vous plus tard.</string>
     <string name="payment_return_error">Le paiement n’a pas pu être confirmé. Vous pouvez reprendre l’inscription ou contacter le support.</string>
+
+    <!-- Vérification paiement (CONTRATS-API §2.2) -->
+    <string name="payment_check_unavailable">Impossible de vérifier votre paiement pour le moment.</string>
 </resources>
+
