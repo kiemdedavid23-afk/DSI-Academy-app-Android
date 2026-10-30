@@ -30,4 +30,10 @@
     <string name="payment_return_success">Payment confirmed. You can sign in to your member space.</string>
     <string name="payment_return_pending">Payment still being confirmed. Refresh shortly or sign in later.</string>
     <string name="payment_return_error">Payment could not be confirmed. You may resume registration or contact support.</string>
+
+    <!-- Pending payment (site inscription + CONTRATS-API) -->
+    <string name="register_payment_hint">Thank you! Your account is almost ready. Only access activation remains.</string>
+    <string name="register_payment_pending">⏳ Payment pending. We will notify you as soon as it is confirmed.</string>
+    <string name="register_payment_failed">❌ Payment not confirmed.</string>
+
 </resources>
