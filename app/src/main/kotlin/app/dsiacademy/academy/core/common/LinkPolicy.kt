@@ -132,6 +132,7 @@ class LinkPolicy(
             .mapNotNull { pair ->
                 val parts = pair.split("=", limit = 2)
                 if (parts.size == 2 && parts[0].equals(name, ignoreCase = true)) {
+                    // Décodage minimal (les espaces + et %xx)
                     try {
                         java.net.URLDecoder.decode(parts[1], StandardCharsets.UTF_8.name())
                     } catch (_: Exception) {
