@@ -558,3 +558,84 @@ private fun openExternal(
             context,
             context.getString(R.string.browser_no_app_found),
             Toast.LENGTH_SHORT,
+        ).show()
+    } catch (_: Exception) {
+        Toast.makeText(
+            context,
+            context.getString(R.string.browser_no_app_found),
+            Toast.LENGTH_SHORT,
+        ).show()
+    }
+}
+
+// region Previews
+
+@Preview(name = "Message — clair", showBackground = true)
+@Composable
+private fun BrowserMessageViewPreviewLight() {
+    DsiTheme(darkTheme = false) {
+        BrowserMessageView(
+            title = "Page indisponible pour le moment",
+            body = "Cette fonctionnalité sera bientôt disponible.",
+            onClose = {},
+        )
+    }
+}
+
+@Preview(name = "Message — sombre", showBackground = true)
+@Composable
+private fun BrowserMessageViewPreviewDark() {
+    DsiTheme(darkTheme = true) {
+        BrowserMessageView(
+            title = "Page indisponible pour le moment",
+            body = "Cette fonctionnalité sera bientôt disponible.",
+            onClose = {},
+        )
+    }
+}
+
+@Preview(name = "Erreur — clair", showBackground = true)
+@Composable
+private fun BrowserErrorViewPreviewLight() {
+    DsiTheme(darkTheme = false) {
+        BrowserErrorView(onRetry = {})
+    }
+}
+
+@Preview(name = "Erreur — sombre", showBackground = true)
+@Composable
+private fun BrowserErrorViewPreviewDark() {
+    DsiTheme(darkTheme = true) {
+        BrowserErrorView(onRetry = {})
+    }
+}
+
+@Preview(name = "TopBar — clair", showBackground = true)
+@Composable
+private fun BrowserTopBarPreviewLight() {
+    DsiTheme(darkTheme = false) {
+        BrowserTopBar(
+            title = "Inscription DSI Academy",
+            host = "exemple.test",
+            isSecure = true,
+            onClose = {},
+            onReload = {},
+        )
+    }
+}
+
+@Preview(name = "TopBar — sombre", showBackground = true)
+@Composable
+private fun BrowserTopBarPreviewDark() {
+    DsiTheme(darkTheme = true) {
+        BrowserTopBar(
+            title = "Inscription DSI Academy",
+            host = "exemple.test",
+            isSecure = true,
+            onClose = {},
+            onReload = {},
+        )
+    }
+}
+
+// endregion
