@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 object DsiIcons {
 
     val Community: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Community", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -47,7 +47,7 @@ object DsiIcons {
     }
 
     val Academy: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Academy", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -75,7 +75,7 @@ object DsiIcons {
     }
 
     val Shop: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Shop", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -98,7 +98,7 @@ object DsiIcons {
     }
 
     val Marketplace: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Marketplace", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -122,7 +122,7 @@ object DsiIcons {
     }
 
     val Home: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Home", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -152,7 +152,7 @@ object DsiIcons {
     }
 
     val Subscription: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Subscription", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -179,7 +179,7 @@ object DsiIcons {
     }
 
     val DsiHoldings: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "DsiHoldings", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -200,7 +200,7 @@ object DsiIcons {
     }
 
     val Withdrawals: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Withdrawals", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -224,7 +224,7 @@ object DsiIcons {
     }
 
     val Payments: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Payments", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -252,7 +252,7 @@ object DsiIcons {
     }
 
     val Referral: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Referral", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -275,7 +275,7 @@ object DsiIcons {
     }
 
     val Notifications: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Notifications", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -298,7 +298,7 @@ object DsiIcons {
     }
 
     val Profile: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Profile", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -317,7 +317,7 @@ object DsiIcons {
     }
 
     val Settings: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Settings", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
@@ -344,7 +344,7 @@ object DsiIcons {
     }
 
     val Logout: ImageVector by lazy {
-        ImageVector.Builder(24, 24, 24f, 24f).apply {
+        ImageVector.Builder(name = "Logout", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
             path(
                 fill = null,
                 stroke = SolidColor(Color.Black),
