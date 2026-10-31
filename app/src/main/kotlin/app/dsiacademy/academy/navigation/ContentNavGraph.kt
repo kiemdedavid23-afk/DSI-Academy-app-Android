@@ -30,11 +30,12 @@ fun NavGraphBuilder.contentNavGraph(
             currentRoute = currentRoute,
             onNavigate = { dest -> goMember(dest) },
             onLogout = { logout() },
-        ) {
+            content = {
             HouseCatalogScreen(
                 onOpenContent = { id, title, type ->
                     navController.navigate(Routes.contentDetail(id, title, type))
-                },
+            },
+        ),
             )
         }
     }

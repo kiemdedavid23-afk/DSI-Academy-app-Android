@@ -53,7 +53,7 @@ fun NavGraphBuilder.memberNavGraph(
                 currentRoute = currentRoute,
                 onNavigate = { dest -> goMember(dest) },
                 onLogout = { logout() },
-            ) {
+                content = {
                 when (route) {
                     Routes.MEMBER_HOME -> MemberHomeScreen(onNavigate = { goMember(it) })
                     Routes.MEMBER_PROFILE -> ProfileScreen()
@@ -69,7 +69,8 @@ fun NavGraphBuilder.memberNavGraph(
                     )
                     else -> MemberPlaceholder(title = routeLabel(route))
                 }
-            }
+                },
+            )
         }
     }
 }
