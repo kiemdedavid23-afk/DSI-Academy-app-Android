@@ -1,0 +1,68 @@
+name: Corriger les icônes (une seule fois)
+
+# Supprime les 10 icônes mal placées et crée les 2 icônes de secours pour Android 7.
+# Lancement manuel : Actions → « Corriger les icônes (une seule fois) » → Run workflow.
+# Sans danger si on le relance : il ne fait rien quand tout est déjà corrigé.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  corriger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Supprimer les 10 icônes mal placées
+        run: |
+          RES="app/src/main/res"
+          for d in mipmap-mdpi mipmap-hdpi mipmap-xhdpi mipmap-xxhdpi mipmap-xxxhdpi; do
+            for f in ic_launcher.xml ic_launcher_round.xml; do
+              if [ -f "$RES/$d/$f" ]; then
+                git rm -q "$RES/$d/$f"
+                echo "Supprimé : $RES/$d/$f"
+              else
+                echo "Déjà absent : $RES/$d/$f"
+              fi
+            done
+          done
+
+      - name: Créer les 2 icônes de secours (Android 7)
+        run: |
+          RES="app/src/main/res"
+          mkdir -p "$RES/mipmap-anydpi"
+          for f in ic_launcher.xml ic_launcher_round.xml; do
+            printf '%s\n' \
+              '<?xml version="1.0" encoding="utf-8"?>' \
+              '<layer-list xmlns:android="http://schemas.android.com/apk/res/android">' \
+              '    <item android:drawable="@color/bg_app"/>' \
+              '    <item android:drawable="@color/gold_prestige"/>' \
+              '</layer-list>' > "$RES/mipmap-anydpi/$f"
+            echo "Créé : $RES/mipmap-anydpi/$f"
+          done
+
+      - name: Vérifier que les icônes adaptatives sont bien en place
+        run: |
+          RES="app/src/main/res"
+          for f in ic_launcher.xml ic_launcher_round.xml; do
+            if [ ! -f "$RES/mipmap-anydpi-v26/$f" ]; then
+              echo "::error title=Icône manquante::$RES/mipmap-anydpi-v26/$f est introuvable : on n'enregistre rien."
+              exit 1
+            fi
+          done
+          echo "OK : les icônes adaptatives (Android 8 et plus) sont présentes."
+
+      - name: Enregistrer les changements
+        run: |
+          git config user.name "dsi-icones-bot"
+          git config user.email "dsi-icones-bot@users.noreply.github.com"
+          git add -A app/src/main/res
+          if git diff --cached --quiet; then
+            echo "Rien à changer : tout est déjà corrigé."
+          else
+            git commit -m "Corriger les icônes : retirer les icônes adaptatives mal placées, ajouter le secours Android 7"
+            git push
+          fi
