@@ -11,14 +11,14 @@ import app.dsiacademy.academy.data.member.dto.ProfilDto
 import app.dsiacademy.academy.data.member.dto.RenouvelerRequestDto
 import app.dsiacademy.academy.data.member.dto.RenouvelerResponseDto
 import app.dsiacademy.academy.data.member.dto.RetraitHistoriqueDto
-import app.dsiacademy.academy.data.member.dto.UtiliserCodeRequestDto
-import app.dsiacademy.academy.data.member.dto.UtiliserCodeResponseDto
-import retrofit2.http.Path
 import app.dsiacademy.academy.data.member.dto.RetraitsResponseDto
 import app.dsiacademy.academy.data.member.dto.SoldeDto
+import app.dsiacademy.academy.data.member.dto.UtiliserCodeRequestDto
+import app.dsiacademy.academy.data.member.dto.UtiliserCodeResponseDto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface MemberApi {
@@ -60,7 +60,6 @@ interface MemberApi {
     @Auth
     @POST("api/abonnement/renouveler")
     suspend fun renouvelerAbonnement(@Body body: RenouvelerRequestDto): RenouvelerResponseDto
-
 
     @Auth
     @POST("api/dsi/utiliser-code")

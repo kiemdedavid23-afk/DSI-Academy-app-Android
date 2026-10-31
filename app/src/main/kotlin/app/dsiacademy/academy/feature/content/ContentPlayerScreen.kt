@@ -111,7 +111,13 @@ fun ContentPlayerScreen(
                 }
                 state.error != null -> Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(state.error!!, fontFamily = ManropeFamily, color = Color(0xFFFCA5A5), fontSize = 14.sp, textAlign = TextAlign.Center)
+                        Text(
+                            state.error!!,
+                            fontFamily = ManropeFamily,
+                            color = Color(0xFFFCA5A5),
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                        )
                         Spacer(Modifier.height(16.dp))
                         Text(
                             "Réessayer",
@@ -124,15 +130,21 @@ fun ContentPlayerScreen(
                 }
                 state.mode != null -> when (val m = state.mode!!) {
                     is PlayerMode.Video -> Media3Player(
-                        url = m.url, video = true, resumeMs = state.resumeMs,
+                        url = m.url,
+                        video = true,
+                        resumeMs = state.resumeMs,
                         onProgress = viewModel::saveMediaProgress,
                     )
                     is PlayerMode.Audio -> AudioFullScreen(
-                        url = m.url, title = state.title, resumeMs = state.resumeMs,
+                        url = m.url,
+                        title = state.title,
+                        resumeMs = state.resumeMs,
                         onProgress = viewModel::saveMediaProgress,
                     )
                     is PlayerMode.Pdf -> PdfReader(
-                        url = m.url, startPage = state.resumePage, onPage = viewModel::savePdfPage,
+                        url = m.url,
+                        startPage = state.resumePage,
+                        onPage = viewModel::savePdfPage,
                     )
                     is PlayerMode.TextContent -> TextReader(url = m.url)
                     is PlayerMode.Image -> ImageReader(url = m.url)
@@ -346,93 +358,92 @@ private fun AudioFullScreen(
                 .padding(horizontal = 20.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-        Spacer(Modifier.height(24.dp))
-        // Disc
-        Box(
-            Modifier
-                .size(220.dp)
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(listOf(palette.first, DarkPremium)),
-                )
-                .border(3.dp, Gold.copy(alpha = 0.4f), CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text("🎧", fontSize = 64.sp)
-        }
-        Spacer(Modifier.height(16.dp))
-        // Equalizer 48 barres (site BAR_COUNT)
-        AudioEqualizer(active = true)
-        Spacer(Modifier.height(20.dp))
-        Text(
-            title,
-            fontFamily = FrauncesFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 22.sp,
-            color = TextOnDark,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text("Audiothèque DSI", fontFamily = ManropeFamily, fontSize = 13.sp, color = TextOnDark.copy(alpha = 0.55f))
-        Spacer(Modifier.weight(1f))
-
-        // Controls
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            CtrlBtn("−10") { player.seekTo((player.currentPosition - 10_000).coerceAtLeast(0)) }
+            Spacer(Modifier.height(24.dp))
+            // Disc
             Box(
                 Modifier
-                    .size(72.dp)
+                    .size(220.dp)
                     .clip(CircleShape)
-                    .background(Gold)
-                    .clickable {
-                        if (player.isPlaying) player.pause() else player.play()
-                    },
+                    .background(
+                        Brush.radialGradient(listOf(palette.first, DarkPremium)),
+                    )
+                    .border(3.dp, Gold.copy(alpha = 0.4f), CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("▶/❚❚", fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, color = Color(0xFF1A1300), fontSize = 14.sp)
+                Text("🎧", fontSize = 64.sp)
             }
-            CtrlBtn("+10") { player.seekTo(player.currentPosition + 10_000) }
-        }
-        Spacer(Modifier.height(20.dp))
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-        ) {
-            CtrlBtn("${speeds[speedIdx]}×") {
-                speedIdx = (speedIdx + 1) % speeds.size
-                player.setPlaybackSpeed(speeds[speedIdx])
+            Spacer(Modifier.height(16.dp))
+            // Equalizer 48 barres (site BAR_COUNT)
+            AudioEqualizer(active = true)
+            Spacer(Modifier.height(20.dp))
+            Text(
+                title,
+                fontFamily = FrauncesFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 22.sp,
+                color = TextOnDark,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text("Audiothèque DSI", fontFamily = ManropeFamily, fontSize = 13.sp, color = TextOnDark.copy(alpha = 0.55f))
+            Spacer(Modifier.weight(1f))
+
+            // Controls
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CtrlBtn("−10") { player.seekTo((player.currentPosition - 10_000).coerceAtLeast(0)) }
+                Box(
+                    Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(Gold)
+                        .clickable {
+                            if (player.isPlaying) player.pause() else player.play()
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("▶/❚❚", fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, color = Color(0xFF1A1300), fontSize = 14.sp)
+                }
+                CtrlBtn("+10") { player.seekTo(player.currentPosition + 10_000) }
             }
-            CtrlBtn(if (sleepMin > 0) "Sleep ${sleepMin}m" else "Sleep") {
-                sleepMin = when (sleepMin) {
-                    0 -> 5
-                    5 -> 15
-                    15 -> 30
-                    else -> 0
+            Spacer(Modifier.height(20.dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                CtrlBtn("${speeds[speedIdx]}×") {
+                    speedIdx = (speedIdx + 1) % speeds.size
+                    player.setPlaybackSpeed(speeds[speedIdx])
+                }
+                CtrlBtn(if (sleepMin > 0) "Sleep ${sleepMin}m" else "Sleep") {
+                    sleepMin = when (sleepMin) {
+                        0 -> 5
+                        5 -> 15
+                        15 -> 30
+                        else -> 0
+                    }
                 }
             }
+            Spacer(Modifier.height(32.dp))
+            AndroidView(
+                factory = { ctx ->
+                    PlayerView(ctx).apply {
+                        this.player = player
+                        useController = true
+                        controllerShowTimeoutMs = 0
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+            )
+            Spacer(Modifier.height(16.dp))
         }
-        Spacer(Modifier.height(32.dp))
-        AndroidView(
-            factory = { ctx ->
-                PlayerView(ctx).apply {
-                    this.player = player
-                    useController = true
-                    controllerShowTimeoutMs = 0
-                }
-            },
-            modifier = Modifier.fillMaxWidth().height(48.dp),
-        )
-        Spacer(Modifier.height(16.dp))
-    }
     }
 }
-
 
 @Composable
 private fun AudioEqualizer(active: Boolean) {
@@ -580,11 +591,18 @@ private fun PdfReader(url: String, startPage: Int = 0, onPage: (Int, Int) -> Uni
                         fontSize = 20.sp,
                         modifier = Modifier
                             .clip(CircleShape)
-                            .clickable(enabled = pageIndex > 0) { pageIndex--; scale = 1f }
+                            .clickable(enabled = pageIndex > 0) {
+                                pageIndex--
+                                scale = 1f
+                            }
                             .padding(12.dp),
                     )
                     Text(
-                        when (themeMode) { 1 -> "Sépia"; 2 -> "Nuit"; else -> "Clair" },
+                        when (themeMode) {
+                            1 -> "Sépia"
+                            2 -> "Nuit"
+                            else -> "Clair"
+                        },
                         fontFamily = ManropeFamily,
                         fontWeight = FontWeight.Bold,
                         color = Gold,
@@ -604,7 +622,10 @@ private fun PdfReader(url: String, startPage: Int = 0, onPage: (Int, Int) -> Uni
                         fontSize = 20.sp,
                         modifier = Modifier
                             .clip(CircleShape)
-                            .clickable(enabled = pageIndex < pageCount - 1) { pageIndex++; scale = 1f }
+                            .clickable(enabled = pageIndex < pageCount - 1) {
+                                pageIndex++
+                                scale = 1f
+                            }
                             .padding(12.dp),
                     )
                 }

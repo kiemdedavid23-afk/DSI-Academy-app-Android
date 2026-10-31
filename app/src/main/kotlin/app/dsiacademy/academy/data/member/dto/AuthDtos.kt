@@ -1,6 +1,5 @@
 package app.dsiacademy.academy.data.member.dto
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**

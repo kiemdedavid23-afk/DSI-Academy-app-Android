@@ -15,11 +15,9 @@ enum class PaymentVerdict {
  * Valeurs connues : active, attente, refuse, introuvable.
  * Toute autre valeur → Waiting (on ne conclut pas).
  */
-fun paymentVerdictFromStatus(status: String?): PaymentVerdict {
-    return when (status?.trim()?.lowercase()) {
-        "active" -> PaymentVerdict.Active
-        "attente" -> PaymentVerdict.Waiting
-        "refuse", "introuvable" -> PaymentVerdict.Refused
-        else -> PaymentVerdict.Waiting
-    }
+fun paymentVerdictFromStatus(status: String?): PaymentVerdict = when (status?.trim()?.lowercase()) {
+    "active" -> PaymentVerdict.Active
+    "attente" -> PaymentVerdict.Waiting
+    "refuse", "introuvable" -> PaymentVerdict.Refused
+    else -> PaymentVerdict.Waiting
 }

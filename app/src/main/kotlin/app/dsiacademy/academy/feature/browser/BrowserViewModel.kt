@@ -7,8 +7,6 @@ import app.dsiacademy.academy.core.common.LinkDecision
 import app.dsiacademy.academy.core.common.LinkPolicy
 import app.dsiacademy.academy.core.config.SiteLinks
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.net.URI
-import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.net.URI
+import javax.inject.Inject
 
 @HiltViewModel
 class BrowserViewModel @Inject constructor(
@@ -130,7 +130,7 @@ class BrowserViewModel @Inject constructor(
                     BrowserEvent.PaymentReturned(
                         status = decision.status,
                         trackingToken = decision.trackingToken,
-                    )
+                    ),
                 )
             }
         }

@@ -149,7 +149,6 @@ data class RenouvelerResult(
     val message: String?,
 )
 
-
 sealed class GiftCodeResult {
     data class Success(val montantDsi: Double, val message: String?) : GiftCodeResult()
     data class Failure(val reason: String) : GiftCodeResult() // alreadyUsed | invalid | session | empty | unavailable

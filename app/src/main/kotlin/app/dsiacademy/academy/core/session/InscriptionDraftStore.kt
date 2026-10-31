@@ -59,18 +59,16 @@ class InscriptionDraftStore @Inject constructor(
         context.inscriptionDataStore.edit { it.remove(key) }
     }
 
-    private fun parse(raw: String): InscriptionDraft? {
-        return try {
-            val j = JSONObject(raw)
-            InscriptionDraft(
-                userId = j.optString("userId").takeIf { it.isNotBlank() && it != "null" },
-                paymentTrackingToken = j.optString("paymentTrackingToken")
-                    .takeIf { it.isNotBlank() && it != "null" },
-                paymentUrl = j.optString("paymentUrl").takeIf { it.isNotBlank() && it != "null" },
-                etape = j.optString("etape", "paiement"),
-            )
-        } catch (_: Exception) {
-            null
-        }
+    private fun parse(raw: String): InscriptionDraft? = try {
+        val j = JSONObject(raw)
+        InscriptionDraft(
+            userId = j.optString("userId").takeIf { it.isNotBlank() && it != "null" },
+            paymentTrackingToken = j.optString("paymentTrackingToken")
+                .takeIf { it.isNotBlank() && it != "null" },
+            paymentUrl = j.optString("paymentUrl").takeIf { it.isNotBlank() && it != "null" },
+            etape = j.optString("etape", "paiement"),
+        )
+    } catch (_: Exception) {
+        null
     }
 }

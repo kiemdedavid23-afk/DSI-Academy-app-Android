@@ -33,7 +33,9 @@ class DsiViewModel @Inject constructor(
     private val _state = MutableStateFlow(DsiUiState())
     val state: StateFlow<DsiUiState> = _state.asStateFlow()
 
-    init { charger() }
+    init {
+        charger()
+    }
 
     fun charger() {
         viewModelScope.launch {

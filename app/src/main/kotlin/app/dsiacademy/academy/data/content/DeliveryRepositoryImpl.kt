@@ -32,7 +32,11 @@ class DeliveryRepositoryImpl @Inject constructor(
             val response = api.deliver(contentId, intent)
             val body = response.body()
             if (!response.isSuccessful || body == null) {
-                val errText = try { body?.string() } catch (_: Exception) { null }
+                val errText = try {
+                    body?.string()
+                } catch (_: Exception) {
+                    null
+                }
                 val errCode = parseErrorCode(errText) ?: "DELIVERY_ERROR"
                 return DsiResult.Success(
                     DeliveryResult.Failure(errCode, DeliveryMessages.message(errCode)),

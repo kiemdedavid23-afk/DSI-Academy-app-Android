@@ -189,7 +189,13 @@ private fun RowCopy(
         Column(Modifier.weight(1f)) {
             Text(label, fontFamily = ManropeFamily, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextMuted)
             Spacer(Modifier.height(2.dp))
-            Text(value, fontFamily = ManropeFamily, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = if (gold) Gold else TextPrimary)
+            Text(
+                value,
+                fontFamily = ManropeFamily,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (gold) Gold else TextPrimary,
+            )
         }
         if (copyable) {
             Text(

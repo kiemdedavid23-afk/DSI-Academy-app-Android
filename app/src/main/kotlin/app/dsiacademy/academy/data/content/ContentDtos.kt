@@ -55,7 +55,6 @@ data class FormationComponentDto(
     val position: Int? = null,
 )
 
-
 @Serializable
 data class CategoriesDto(
     val items: List<CategoryDto>? = null,

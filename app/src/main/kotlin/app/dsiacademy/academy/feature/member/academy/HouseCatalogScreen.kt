@@ -111,7 +111,9 @@ fun HouseCatalogScreen(
             state.error != null -> Text(state.error!!, fontFamily = ManropeFamily, color = Color(0xFFB91C1C), fontSize = 14.sp)
             state.items.isEmpty() -> Text(
                 "Aucun contenu pour le moment.",
-                fontFamily = ManropeFamily, fontSize = 13.sp, color = TextM,
+                fontFamily = ManropeFamily,
+                fontSize = 13.sp,
+                color = TextM,
             )
             else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(state.items, key = { it.id }) { item ->

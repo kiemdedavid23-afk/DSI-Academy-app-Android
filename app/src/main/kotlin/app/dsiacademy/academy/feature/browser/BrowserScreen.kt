@@ -1,5 +1,6 @@
 package app.dsiacademy.academy.feature.browser
 
+import android.webkit.WebView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import android.webkit.WebView
 import app.dsiacademy.academy.R
 import app.dsiacademy.academy.core.common.LinkDecision
 import app.dsiacademy.academy.core.common.PaymentReturnStatus

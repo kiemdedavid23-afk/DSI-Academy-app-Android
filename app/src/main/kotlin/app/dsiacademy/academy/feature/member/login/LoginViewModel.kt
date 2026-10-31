@@ -11,7 +11,6 @@ import app.dsiacademy.academy.domain.member.AuthRepository
 import app.dsiacademy.academy.domain.member.LoginSuccess
 import app.dsiacademy.academy.domain.member.PendingPayment
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class LoginUiState(
     val identifiant: String = "",

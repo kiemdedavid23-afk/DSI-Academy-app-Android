@@ -57,7 +57,9 @@ class ContentPlayerViewModel @Inject constructor(
     )
     val state: StateFlow<ContentPlayerUiState> = _state.asStateFlow()
 
-    init { open() }
+    init {
+        open()
+    }
 
     fun open() {
         if (contentId.isBlank()) {
@@ -140,8 +142,11 @@ class ContentPlayerViewModel @Inject constructor(
             f in listOf("mp3", "aac", "m4a", "ogg", "wav") || contentType == "audio" ->
                 PlayerMode.Audio(url)
             f in listOf("mp4", "webm", "mkv") || contentType == "video" ->
-                if (u.contains("youtube") || u.contains("youtu.be")) PlayerMode.External(url, format)
-                else PlayerMode.Video(url)
+                if (u.contains("youtube") || u.contains("youtu.be")) {
+                    PlayerMode.External(url, format)
+                } else {
+                    PlayerMode.Video(url)
+                }
             f == "pdf" -> PlayerMode.Pdf(url)
             f in listOf("txt", "text", "md") -> PlayerMode.TextContent(url)
             f in listOf("png", "jpg", "jpeg", "webp", "gif") -> PlayerMode.Image(url)

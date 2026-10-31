@@ -28,7 +28,9 @@ class PaymentsViewModel @Inject constructor(
     private val _state = MutableStateFlow(PaymentsUiState())
     val state: StateFlow<PaymentsUiState> = _state.asStateFlow()
 
-    init { load(1) }
+    init {
+        load(1)
+    }
 
     fun load(page: Int) {
         viewModelScope.launch {

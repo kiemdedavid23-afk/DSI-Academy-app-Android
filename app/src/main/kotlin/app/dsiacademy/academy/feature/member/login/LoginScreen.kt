@@ -116,24 +116,43 @@ fun LoginContent(state: LoginUiState, onAction: (LoginUiAction) -> Unit) {
                     .border(1.dp, Line, RoundedCornerShape(20.dp))
                     .padding(horizontal = 28.dp, vertical = 36.dp),
             ) {
-                Text("ESPACE MEMBRE", fontFamily = IbmPlexMonoFamily, fontWeight = FontWeight.Medium, fontSize = 11.5.sp, letterSpacing = 1.5.sp, color = Gold)
+                Text(
+                    "ESPACE MEMBRE",
+                    fontFamily = IbmPlexMonoFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 11.5.sp,
+                    letterSpacing = 1.5.sp,
+                    color = Gold,
+                )
                 Spacer(Modifier.height(10.dp))
                 Text("Bon retour", fontFamily = FrauncesFamily, fontWeight = FontWeight.SemiBold, fontSize = 27.2.sp, color = Ink)
                 Spacer(Modifier.height(6.dp))
                 Text(
                     "Connectez-vous pour accéder à vos formations, votre bibliothèque et votre solde DSI.",
-                    fontFamily = ManropeFamily, fontSize = 14.4.sp, color = TextSoft, lineHeight = 21.6.sp,
+                    fontFamily = ManropeFamily,
+                    fontSize = 14.4.sp,
+                    color = TextSoft,
+                    lineHeight = 21.6.sp,
                 )
                 Spacer(Modifier.height(26.dp))
 
-                DsiLoginField("Email ou numéro WhatsApp", state.identifiant, { onAction(LoginUiAction.IdentifiantChanged(it)) },
-                    "vous@exemple.com", state.idInvalide, "Renseignez votre email ou votre numéro WhatsApp.",
-                    KeyboardType.Email, ImeAction.Next)
+                DsiLoginField(
+                    "Email ou numéro WhatsApp",
+                    state.identifiant,
+                    { onAction(LoginUiAction.IdentifiantChanged(it)) },
+                    "vous@exemple.com",
+                    state.idInvalide,
+                    "Renseignez votre email ou votre numéro WhatsApp.",
+                    KeyboardType.Email,
+                    ImeAction.Next,
+                )
                 Spacer(Modifier.height(16.dp))
-                DsiLoginField("Mot de passe", state.motDePasse, { onAction(LoginUiAction.MotDePasseChanged(it)) },
+                DsiLoginField(
+                    "Mot de passe", state.motDePasse, { onAction(LoginUiAction.MotDePasseChanged(it)) },
                     "Votre mot de passe", state.mdpInvalide, "Renseignez votre mot de passe.",
                     KeyboardType.Password, ImeAction.Done, true, state.afficherMdp,
-                    { onAction(LoginUiAction.ToggleAfficherMdp) }, { onAction(LoginUiAction.Submit) })
+                    { onAction(LoginUiAction.ToggleAfficherMdp) }, { onAction(LoginUiAction.Submit) },
+                )
                 Spacer(Modifier.height(14.dp))
 
                 Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween, Alignment.CenterVertically) {
@@ -151,8 +170,14 @@ fun LoginContent(state: LoginUiState, onAction: (LoginUiAction) -> Unit) {
                         Spacer(Modifier.width(7.dp))
                         Text("Se souvenir de moi", fontFamily = ManropeFamily, fontSize = 13.3.sp, color = TextSoft)
                     }
-                    Text("Mot de passe oublié ?", fontFamily = ManropeFamily, fontSize = 13.3.sp, color = TextSoft,
-                        textDecoration = TextDecoration.Underline, modifier = Modifier.clickable { onAction(LoginUiAction.ForgotPassword) })
+                    Text(
+                        "Mot de passe oublié ?",
+                        fontFamily = ManropeFamily,
+                        fontSize = 13.3.sp,
+                        color = TextSoft,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable { onAction(LoginUiAction.ForgotPassword) },
+                    )
                 }
                 Spacer(Modifier.height(18.dp))
 
@@ -167,14 +192,23 @@ fun LoginContent(state: LoginUiState, onAction: (LoginUiAction) -> Unit) {
                             CircularProgressIndicator(Modifier.size(16.dp), BtnText, strokeWidth = 2.dp)
                             Spacer(Modifier.width(8.dp))
                         }
-                        Text(if (state.chargement) "Connexion…" else "Se connecter", fontFamily = ManropeFamily,
-                            fontWeight = FontWeight.Bold, fontSize = 14.7.sp, color = BtnText.copy(alpha = if (state.chargement) 0.6f else 1f))
+                        Text(
+                            if (state.chargement) "Connexion…" else "Se connecter",
+                            fontFamily = ManropeFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.7.sp,
+                            color = BtnText.copy(alpha = if (state.chargement) 0.6f else 1f),
+                        )
                     }
                 }
 
                 if (state.messageErreur != null) {
                     Spacer(Modifier.height(16.dp))
-                    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(ErrorBg).padding(horizontal = 14.dp, vertical = 11.dp)) {
+                    Box(
+                        Modifier.fillMaxWidth().clip(
+                            RoundedCornerShape(10.dp),
+                        ).background(ErrorBg).padding(horizontal = 14.dp, vertical = 11.dp),
+                    ) {
                         Text(state.messageErreur!!, fontFamily = ManropeFamily, fontSize = 13.4.sp, color = ErrorText, lineHeight = 20.sp)
                     }
                 }
@@ -185,20 +219,40 @@ fun LoginContent(state: LoginUiState, onAction: (LoginUiAction) -> Unit) {
         Spacer(Modifier.height(18.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Text("Pas encore de compte ? ", fontFamily = ManropeFamily, fontSize = 14.sp, color = TextSoft)
-            Text("Créer un compte", fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Ink,
-                modifier = Modifier.clickable { onAction(LoginUiAction.GoRegister) })
+            Text(
+                "Créer un compte",
+                fontFamily = ManropeFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = Ink,
+                modifier = Modifier.clickable { onAction(LoginUiAction.GoRegister) },
+            )
         }
-        Text("© DSI Academy", fontFamily = ManropeFamily, fontSize = 12.2.sp, color = TextSoft, textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(18.dp))
+        Text(
+            "© DSI Academy",
+            fontFamily = ManropeFamily,
+            fontSize = 12.2.sp,
+            color = TextSoft,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(18.dp),
+        )
     }
 }
 
 @Composable
 private fun DsiLoginField(
-    label: String, value: String, onValueChange: (String) -> Unit, placeholder: String,
-    isError: Boolean, errorText: String, keyboardType: KeyboardType, imeAction: ImeAction,
-    isPassword: Boolean = false, showPassword: Boolean = false,
-    onTogglePassword: (() -> Unit)? = null, onDone: (() -> Unit)? = null,
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    isError: Boolean,
+    errorText: String,
+    keyboardType: KeyboardType,
+    imeAction: ImeAction,
+    isPassword: Boolean = false,
+    showPassword: Boolean = false,
+    onTogglePassword: (() -> Unit)? = null,
+    onDone: (() -> Unit)? = null,
 ) {
     Text(label, fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, fontSize = 12.5.sp, color = TextSoft)
     Spacer(Modifier.height(6.dp))
@@ -221,7 +275,12 @@ private fun DsiLoginField(
             }
             if (isPassword && onTogglePassword != null) {
                 IconButton(onClick = onTogglePassword, modifier = Modifier.size(28.dp)) {
-                    Icon(if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility, "Afficher le mot de passe", tint = TextSoft, modifier = Modifier.size(18.dp))
+                    Icon(
+                        if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        "Afficher le mot de passe",
+                        tint = TextSoft,
+                        modifier = Modifier.size(18.dp),
+                    )
                 }
             }
         }

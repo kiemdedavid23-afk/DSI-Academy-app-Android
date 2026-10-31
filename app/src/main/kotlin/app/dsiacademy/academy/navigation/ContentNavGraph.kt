@@ -19,7 +19,10 @@ fun NavGraphBuilder.contentNavGraph(
         route = Routes.HOUSE_CATALOG,
         arguments = listOf(
             navArgument("type") { type = NavType.StringType },
-            navArgument("title") { type = NavType.StringType; defaultValue = "Catalogue" },
+            navArgument("title") {
+                type = NavType.StringType
+                defaultValue = "Catalogue"
+            },
         ),
     ) { entry ->
         val currentRoute = entry.destination.route ?: Routes.HOUSE_CATALOG
@@ -40,8 +43,14 @@ fun NavGraphBuilder.contentNavGraph(
         route = Routes.CONTENT_DETAIL,
         arguments = listOf(
             navArgument("contentId") { type = NavType.StringType },
-            navArgument("title") { type = NavType.StringType; defaultValue = "Contenu" },
-            navArgument("type") { type = NavType.StringType; defaultValue = "book" },
+            navArgument("title") {
+                type = NavType.StringType
+                defaultValue = "Contenu"
+            },
+            navArgument("type") {
+                type = NavType.StringType
+                defaultValue = "book"
+            },
         ),
     ) {
         ContentDetailScreen(
@@ -56,8 +65,14 @@ fun NavGraphBuilder.contentNavGraph(
         route = Routes.CONTENT_PLAYER,
         arguments = listOf(
             navArgument("contentId") { type = NavType.StringType },
-            navArgument("title") { type = NavType.StringType; defaultValue = "Contenu" },
-            navArgument("type") { type = NavType.StringType; defaultValue = "book" },
+            navArgument("title") {
+                type = NavType.StringType
+                defaultValue = "Contenu"
+            },
+            navArgument("type") {
+                type = NavType.StringType
+                defaultValue = "book"
+            },
         ),
     ) {
         ContentPlayerScreen(onClose = { navController.popBackStack() })

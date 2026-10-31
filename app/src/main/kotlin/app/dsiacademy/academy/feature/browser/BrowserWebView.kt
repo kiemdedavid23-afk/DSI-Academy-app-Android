@@ -98,9 +98,7 @@ fun BrowserWebView(
                 }
 
                 @Deprecated("Deprecated in Java")
-                override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                    return onNavigationRequest(url)
-                }
+                override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean = onNavigationRequest(url)
 
                 override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
                     if (url != null) onPageStarted(url)

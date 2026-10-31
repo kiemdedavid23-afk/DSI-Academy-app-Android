@@ -36,7 +36,9 @@ class SubscriptionViewModel @Inject constructor(
     private val _events = Channel<SubEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
-    init { charger() }
+    init {
+        charger()
+    }
 
     fun charger() {
         viewModelScope.launch {

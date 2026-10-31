@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,11 +43,22 @@ fun WelcomeScreen(onLogin: () -> Unit, onRegister: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Text("ESPACE MEMBRE", fontFamily = IbmPlexMonoFamily, fontSize = 11.5.sp, letterSpacing = 1.5.sp, color = Gold)
         Spacer(Modifier.height(10.dp))
-        Text("DSI Academy", fontFamily = FrauncesFamily, fontWeight = FontWeight.SemiBold, fontSize = 32.sp, color = Ink, textAlign = TextAlign.Center)
+        Text(
+            "DSI Academy",
+            fontFamily = FrauncesFamily,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 32.sp,
+            color = Ink,
+            textAlign = TextAlign.Center,
+        )
         Spacer(Modifier.height(10.dp))
         Text(
             "Formations, bibliothèque, communauté et solde DSI — accessible 24h/24 depuis votre téléphone.",
-            fontFamily = ManropeFamily, fontSize = 15.sp, color = TextSoft, textAlign = TextAlign.Center, lineHeight = 22.sp,
+            fontFamily = ManropeFamily,
+            fontSize = 15.sp,
+            color = TextSoft,
+            textAlign = TextAlign.Center,
+            lineHeight = 22.sp,
         )
         Spacer(Modifier.weight(1f))
         Box(

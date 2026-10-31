@@ -23,14 +23,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import app.dsiacademy.academy.R
 import app.dsiacademy.academy.core.designsystem.theme.FrauncesFamily
 import app.dsiacademy.academy.core.designsystem.theme.IbmPlexMonoFamily
 import app.dsiacademy.academy.core.designsystem.theme.ManropeFamily
 import app.dsiacademy.academy.core.session.LocalContentStores
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn

@@ -12,12 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -183,12 +181,22 @@ fun MemberHomeScreen(
                             Text(c.icon, fontSize = 22.sp)
                             Spacer(Modifier.width(10.dp))
                             Column(Modifier.weight(1f)) {
-                                Text(c.title, fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary)
+                                Text(
+                                    c.title,
+                                    fontFamily = ManropeFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = TextPrimary,
+                                )
                                 Text(c.house, fontFamily = ManropeFamily, fontSize = 12.sp, color = TextMuted)
                                 c.progress?.let { pct ->
                                     Spacer(Modifier.height(6.dp))
                                     Box(Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)).background(Color(0xFFE2E8F0))) {
-                                        Box(Modifier.fillMaxWidth(pct / 100f).height(4.dp).clip(RoundedCornerShape(2.dp)).background(HomeGold))
+                                        Box(
+                                            Modifier.fillMaxWidth(
+                                                pct / 100f,
+                                            ).height(4.dp).clip(RoundedCornerShape(2.dp)).background(HomeGold),
+                                        )
                                     }
                                 }
                             }
@@ -212,7 +220,13 @@ fun MemberHomeScreen(
                         Text("Aucune activité récente", fontFamily = ManropeFamily, fontSize = 13.sp, color = TextMuted)
                     } else {
                         state.activite.forEach { line ->
-                            Text(line, fontFamily = ManropeFamily, fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(vertical = 4.dp))
+                            Text(
+                                line,
+                                fontFamily = ManropeFamily,
+                                fontSize = 13.sp,
+                                color = TextSecondary,
+                                modifier = Modifier.padding(vertical = 4.dp),
+                            )
                         }
                     }
                 }

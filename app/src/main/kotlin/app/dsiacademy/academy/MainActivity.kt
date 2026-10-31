@@ -34,7 +34,7 @@ private fun DsiApp() {
     androidx.compose.foundation.layout.Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.bgApp)
+            .background(colors.bgApp),
     ) {
         DsiNavHost()
     }

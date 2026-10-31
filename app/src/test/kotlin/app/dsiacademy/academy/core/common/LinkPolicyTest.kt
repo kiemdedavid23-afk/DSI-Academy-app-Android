@@ -170,7 +170,7 @@ class LinkPolicyTest {
     @Test
     fun decide_paiementRetour_tokenSousPaymentTrackingToken() {
         val result = policy.decide(
-            "https://dsiacademy.com/paiement-retour?status=ok&paymentTrackingToken=tok123"
+            "https://dsiacademy.com/paiement-retour?status=ok&paymentTrackingToken=tok123",
         )
         assertEquals("tok123", (result as LinkDecision.PaymentReturn).trackingToken)
     }
@@ -217,7 +217,7 @@ class LinkPolicyTest {
     @Test
     fun decide_hoteExterneTiktok_retourneOpenExternal() {
         assertTrue(
-            policy.decide("https://www.tiktok.com/@dsi169") is LinkDecision.OpenExternal
+            policy.decide("https://www.tiktok.com/@dsi169") is LinkDecision.OpenExternal,
         )
     }
 
@@ -245,7 +245,7 @@ class LinkPolicyTest {
         // Passerelle de paiement atteinte depuis le site (autre hôte https non listé)
         assertEquals(
             LinkDecision.Allow,
-            policy.decide("https://checkout.chariow.com/pay/xyz")
+            policy.decide("https://checkout.chariow.com/pay/xyz"),
         )
     }
 
@@ -253,7 +253,7 @@ class LinkPolicyTest {
     fun decide_casseHttpsEtHote_retourneAllow() {
         assertEquals(
             LinkDecision.Allow,
-            policy.decide("HTTPS://DSIACADEMY.COM/inscription")
+            policy.decide("HTTPS://DSIACADEMY.COM/inscription"),
         )
     }
 
@@ -263,7 +263,7 @@ class LinkPolicyTest {
     fun startUrl_sansQuery_construitUrlCorrecte() {
         assertEquals(
             "https://dsiacademy.com/inscription",
-            policy.startUrl("/inscription")
+            policy.startUrl("/inscription"),
         )
     }
 
@@ -272,7 +272,7 @@ class LinkPolicyTest {
         val url = policy.startUrl("/inscription", mapOf("ref" to "ABC 123", "x" to "a=b"))
         assertEquals(
             "https://dsiacademy.com/inscription?ref=ABC+123&x=a%3Db",
-            url
+            url,
         )
     }
 
@@ -280,7 +280,7 @@ class LinkPolicyTest {
     fun startUrl_pathSansSlashInitial_ajouteSlash() {
         assertEquals(
             "https://dsiacademy.com/inscription",
-            policy.startUrl("inscription")
+            policy.startUrl("inscription"),
         )
     }
 

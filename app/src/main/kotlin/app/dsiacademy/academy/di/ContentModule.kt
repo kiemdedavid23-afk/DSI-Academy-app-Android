@@ -1,11 +1,11 @@
 package app.dsiacademy.academy.di
 
 import app.dsiacademy.academy.data.content.ContentApi
+import app.dsiacademy.academy.data.content.ContentRepository
+import app.dsiacademy.academy.data.content.ContentRepositoryImpl
 import app.dsiacademy.academy.data.content.DeliveryApi
 import app.dsiacademy.academy.data.content.DeliveryRepository
 import app.dsiacademy.academy.data.content.DeliveryRepositoryImpl
-import app.dsiacademy.academy.data.content.ContentRepository
-import app.dsiacademy.academy.data.content.ContentRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

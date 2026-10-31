@@ -1,6 +1,5 @@
 package app.dsiacademy.academy.data.content
 
-import app.dsiacademy.academy.core.common.AppError
 import app.dsiacademy.academy.core.common.DsiResult
 import app.dsiacademy.academy.core.network.safeCall
 import app.dsiacademy.academy.domain.content.ContentCategory
@@ -64,13 +63,11 @@ class ContentRepositoryImpl @Inject constructor(
 
     override suspend fun isDownloadable(id: String): Boolean
     suspend fun getCategories(type: String): DsiResult<List<ContentCategory>>
-    suspend fun search(query: String, type: String?, limit: Int = 30): DsiResult<ContentPage> {
-        return try {
-            val r = safeCall { api.getBestAsset(id) }
-            (r as? DsiResult.Success)?.data?.downloadable == true
-        } catch (_: Exception) {
-            false
-        }
+    suspend fun search(query: String, type: String?, limit: Int = 30): DsiResult<ContentPage> = try {
+        val r = safeCall { api.getBestAsset(id) }
+        (r as? DsiResult.Success)?.data?.downloadable == true
+    } catch (_: Exception) {
+        false
     }
 
     private fun mapNode(dto: FormationTreeDto): FormationNode = FormationNode(

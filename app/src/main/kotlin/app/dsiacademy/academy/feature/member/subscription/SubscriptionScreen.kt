@@ -3,7 +3,6 @@ package app.dsiacademy.academy.feature.member.subscription
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -101,7 +100,14 @@ fun SubscriptionScreen(vm: SubscriptionViewModel = hiltViewModel()) {
                         .padding(16.dp),
                 ) {
                     Row(Modifier.fillMaxWidth()) {
-                        Text(title, fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White, modifier = Modifier.weight(1f))
+                        Text(
+                            title,
+                            fontFamily = ManropeFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color.White,
+                            modifier = Modifier.weight(1f),
+                        )
                         val badgeBg = when (etat) {
                             "active" -> GoldLight
                             "expired" -> Color(0xFFFEE2E2)
@@ -187,8 +193,11 @@ fun SubscriptionScreen(vm: SubscriptionViewModel = hiltViewModel()) {
                         .clickable(enabled = !state.renewing) { vm.renouveler("dsi") },
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (state.renewing) CircularProgressIndicator(Modifier.size(16.dp), BtnT, strokeWidth = 2.dp)
-                    else Text("Payer en DSI", fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = BtnT)
+                    if (state.renewing) {
+                        CircularProgressIndicator(Modifier.size(16.dp), BtnT, strokeWidth = 2.dp)
+                    } else {
+                        Text("Payer en DSI", fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = BtnT)
+                    }
                 }
                 Spacer(Modifier.height(10.dp))
                 Box(

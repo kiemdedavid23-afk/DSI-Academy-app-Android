@@ -4,8 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.doubleOrNull
 
 @Serializable
 data class ProfilDto(
@@ -161,7 +161,6 @@ data class RenouvelerResponseDto(
     val message: String? = null,
     val erreur: String? = null,
 )
-
 
 @Serializable
 data class UtiliserCodeRequestDto(val code: String)

@@ -22,7 +22,6 @@ data class ContentPage(
     val hasMore: Boolean,
 )
 
-
 data class ContentCategory(
     val id: String,
     val name: String,

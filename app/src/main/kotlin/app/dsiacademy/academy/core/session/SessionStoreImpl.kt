@@ -53,9 +53,7 @@ class SessionStoreImpl @Inject constructor(
         _sessionFlow.value = readPersistent()
     }
 
-    override fun getSession(): MemberSession? {
-        return memorySession ?: readPersistent()
-    }
+    override fun getSession(): MemberSession? = memorySession ?: readPersistent()
 
     override fun hasSession(): Boolean = getSession() != null
 

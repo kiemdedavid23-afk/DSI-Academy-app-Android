@@ -28,7 +28,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.dsiacademy.academy.core.designsystem.theme.FrauncesFamily
 import app.dsiacademy.academy.core.designsystem.theme.ManropeFamily
-import app.dsiacademy.academy.domain.member.RetraitItem
 
 private val Gold = Color(0xFFD4AF37)
 private val GoldB = Color(0xFFE8C77E)
@@ -79,7 +78,10 @@ fun WithdrawalsScreen(vm: WithdrawalsViewModel = hiltViewModel()) {
                 }
                 DropdownMenu(menu, { menu = false }) {
                     state.moyens.forEach { m ->
-                        DropdownMenuItem(text = { Text(m) }, onClick = { vm.setMoyen(m); menu = false })
+                        DropdownMenuItem(text = { Text(m) }, onClick = {
+                            vm.setMoyen(m)
+                            menu = false
+                        })
                     }
                 }
             }
@@ -92,8 +94,11 @@ fun WithdrawalsScreen(vm: WithdrawalsViewModel = hiltViewModel()) {
                     .clickable(enabled = !state.submitting) { vm.soumettre() },
                 contentAlignment = Alignment.Center,
             ) {
-                if (state.submitting) CircularProgressIndicator(Modifier.size(16.dp), BtnT, strokeWidth = 2.dp)
-                else Text("Demander un retrait", fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = BtnT)
+                if (state.submitting) {
+                    CircularProgressIndicator(Modifier.size(16.dp), BtnT, strokeWidth = 2.dp)
+                } else {
+                    Text("Demander un retrait", fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = BtnT)
+                }
             }
             state.error?.let {
                 Spacer(Modifier.height(10.dp))
@@ -106,7 +111,9 @@ fun WithdrawalsScreen(vm: WithdrawalsViewModel = hiltViewModel()) {
             Spacer(Modifier.height(8.dp))
             Text(
                 "La validation serveur (plafond, fréquence) prime toujours.",
-                fontFamily = ManropeFamily, fontSize = 11.sp, color = TextM,
+                fontFamily = ManropeFamily,
+                fontSize = 11.sp,
+                color = TextM,
             )
         }
 
@@ -125,7 +132,13 @@ fun WithdrawalsScreen(vm: WithdrawalsViewModel = hiltViewModel()) {
                         .padding(14.dp),
                 ) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("${r.montantDsiNet.toLong()} DSI", fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = TextP)
+                        Text(
+                            "${r.montantDsiNet.toLong()} DSI",
+                            fontFamily = ManropeFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            color = TextP,
+                        )
                         StatusChip(r.statut)
                     }
                     Text(r.dateDemande ?: "", fontFamily = ManropeFamily, fontSize = 12.sp, color = TextM)
@@ -139,7 +152,13 @@ fun WithdrawalsScreen(vm: WithdrawalsViewModel = hiltViewModel()) {
                         StatusFrise(r.statut)
                         if (state.evenements.isNotEmpty()) {
                             Spacer(Modifier.height(12.dp))
-                            Text("Historique", fontFamily = ManropeFamily, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, color = TextM)
+                            Text(
+                                "Historique",
+                                fontFamily = ManropeFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.sp,
+                                color = TextM,
+                            )
                             state.evenements.forEach { e ->
                                 Text(
                                     "${e.date ?: ""} · ${e.champ ?: ""} : ${e.ancienneValeur ?: "—"} → ${e.nouvelleValeur ?: "—"}",
@@ -218,7 +237,9 @@ private fun Field(label: String, value: String, onChange: (String) -> Unit) {
     Spacer(Modifier.height(4.dp))
     Box(Modifier.fillMaxWidth().border(1.dp, Border, RoundedCornerShape(10.dp)).padding(14.dp)) {
         BasicTextField(
-            value = value, onValueChange = onChange, singleLine = true,
+            value = value,
+            onValueChange = onChange,
+            singleLine = true,
             textStyle = TextStyle(fontFamily = ManropeFamily, fontSize = 14.sp, color = TextP),
             cursorBrush = SolidColor(Gold),
             modifier = Modifier.fillMaxWidth(),

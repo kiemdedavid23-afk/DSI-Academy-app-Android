@@ -49,7 +49,9 @@ class WithdrawalsViewModel @Inject constructor(
     private val _state = MutableStateFlow(WithdrawalsUiState())
     val state: StateFlow<WithdrawalsUiState> = _state.asStateFlow()
 
-    init { charger() }
+    init {
+        charger()
+    }
 
     fun charger() {
         viewModelScope.launch {
@@ -103,8 +105,9 @@ class WithdrawalsViewModel @Inject constructor(
                 }
                 is DsiResult.Success -> {
                     val msg = when (r.data.status) {
-                        "demande_enregistree" -> r.data.message
-                            ?: "Demande enregistrée (${r.data.idRetrait ?: ""})."
+                        "demande_enregistree" ->
+                            r.data.message
+                                ?: "Demande enregistrée (${r.data.idRetrait ?: ""})."
                         else -> r.data.message ?: "Demande refusée."
                     }
                     _state.update {

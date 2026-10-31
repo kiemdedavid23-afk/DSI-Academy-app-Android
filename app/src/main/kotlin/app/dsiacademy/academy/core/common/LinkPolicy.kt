@@ -66,7 +66,13 @@ class LinkPolicy(
 
         // b. Schémas interdits
         val blockedSchemes = setOf(
-            "javascript", "file", "data", "content", "blob", "about", "http"
+            "javascript",
+            "file",
+            "data",
+            "content",
+            "blob",
+            "about",
+            "http",
         )
         if (scheme in blockedSchemes) return LinkDecision.Block
 
@@ -88,7 +94,7 @@ class LinkPolicy(
         if (host == siteHost && path == "/paiement-retour") {
             val statusRaw = (
                 queryParam(uri, "status") ?: queryParam(uri, "etat") ?: ""
-            ).lowercase()
+                ).lowercase()
             val status = when (statusRaw) {
                 "success", "ok", "paid" -> PaymentReturnStatus.Success
                 "failed", "error", "cancel" -> PaymentReturnStatus.Failed

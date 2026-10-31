@@ -43,10 +43,18 @@ class ContentDetailViewModel @Inject constructor(
                         it.copy(loading = false, error = r.error.message ?: "Formation introuvable.")
                     }
                     is DsiResult.Success -> _state.update {
-                        it.copy(loading = false, tree = r.data, item = ContentItem(
-                            id = r.data.id, title = r.data.title, slug = null,
-                            type = "training", summary = null, coverUrl = null,
-                        ))
+                        it.copy(
+                            loading = false,
+                            tree = r.data,
+                            item = ContentItem(
+                                id = r.data.id,
+                                title = r.data.title,
+                                slug = null,
+                                type = "training",
+                                summary = null,
+                                coverUrl = null,
+                            ),
+                        )
                     }
                 }
             } else {

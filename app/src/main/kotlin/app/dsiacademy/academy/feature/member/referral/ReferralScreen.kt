@@ -1,7 +1,9 @@
 package app.dsiacademy.academy.feature.member.referral
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,11 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import android.content.Intent
-import androidx.compose.foundation.clickable
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,7 +63,14 @@ fun ReferralScreen(viewModel: ReferralViewModel = hiltViewModel()) {
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(GoldLight)
                     .border(1.dp, Gold.copy(alpha = 0.35f), RoundedCornerShape(14.dp)).padding(16.dp),
             ) {
-                Text("VOTRE CODE", fontFamily = ManropeFamily, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, color = Gold)
+                Text(
+                    "VOTRE CODE",
+                    fontFamily = ManropeFamily,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    color = Gold,
+                )
                 Spacer(Modifier.height(6.dp))
                 Text(
                     state.code.ifBlank { "—" },
@@ -150,7 +156,10 @@ fun ReferralScreen(viewModel: ReferralViewModel = hiltViewModel()) {
             Spacer(Modifier.height(16.dp))
             Text(
                 "Récompenses affichées (règles) : N1 = 500 DSI, N2 = 120 DSI — affichage seul ; le Worker attribue les gains réels.",
-                fontFamily = ManropeFamily, fontSize = 12.sp, color = TextMuted, lineHeight = 17.sp,
+                fontFamily = ManropeFamily,
+                fontSize = 12.sp,
+                color = TextMuted,
+                lineHeight = 17.sp,
             )
         }
     }

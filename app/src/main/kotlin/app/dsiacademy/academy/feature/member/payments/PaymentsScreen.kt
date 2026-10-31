@@ -54,11 +54,16 @@ fun PaymentsScreen(vm: PaymentsViewModel = hiltViewModel()) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(
                             "${p.montant.toLong()} ${p.devise ?: ""}".trim(),
-                            fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = TextP,
+                            fontFamily = ManropeFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            color = TextP,
                         )
                         Text(
                             if (paid) "Payé" else "En attente",
-                            fontFamily = ManropeFamily, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                            fontFamily = ManropeFamily,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
                             color = if (paid) Green else TextS,
                         )
                     }
@@ -75,12 +80,22 @@ fun PaymentsScreen(vm: PaymentsViewModel = hiltViewModel()) {
                 Text("Page ${state.page} / ${state.totalPages}", fontFamily = ManropeFamily, fontSize = 13.sp, color = TextM)
                 Row {
                     if (state.page > 1) {
-                        Text("← Préc.", fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, color = Gold,
-                            modifier = Modifier.clickable { vm.load(state.page - 1) }.padding(8.dp))
+                        Text(
+                            "← Préc.",
+                            fontFamily = ManropeFamily,
+                            fontWeight = FontWeight.Bold,
+                            color = Gold,
+                            modifier = Modifier.clickable { vm.load(state.page - 1) }.padding(8.dp),
+                        )
                     }
                     if (state.page < state.totalPages) {
-                        Text("Suiv. →", fontFamily = ManropeFamily, fontWeight = FontWeight.Bold, color = Gold,
-                            modifier = Modifier.clickable { vm.load(state.page + 1) }.padding(8.dp))
+                        Text(
+                            "Suiv. →",
+                            fontFamily = ManropeFamily,
+                            fontWeight = FontWeight.Bold,
+                            color = Gold,
+                            modifier = Modifier.clickable { vm.load(state.page + 1) }.padding(8.dp),
+                        )
                     }
                 }
             }

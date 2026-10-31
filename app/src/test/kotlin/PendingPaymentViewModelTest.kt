@@ -6,8 +6,6 @@ import app.dsiacademy.academy.core.common.DsiResult
 import app.dsiacademy.academy.core.session.InscriptionDraft
 import app.dsiacademy.academy.core.session.InscriptionDraftStore
 import app.dsiacademy.academy.domain.member.AuthRepository
-import app.dsiacademy.academy.domain.member.InscriptionCreated
-import app.dsiacademy.academy.domain.member.InscriptionForm
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -21,7 +19,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test

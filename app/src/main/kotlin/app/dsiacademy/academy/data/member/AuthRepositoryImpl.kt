@@ -34,7 +34,7 @@ class AuthRepositoryImpl @Inject constructor(
                 val erreur = dto.erreur ?: dto.message
                 if (!erreur.isNullOrBlank() && dto.status == null && dto.token == null) {
                     return DsiResult.Error(
-                        AppError.Http(code = "AUTH_ERROR", message = erreur, httpStatus = 200)
+                        AppError.Http(code = "AUTH_ERROR", message = erreur, httpStatus = 200),
                     )
                 }
                 when {
@@ -47,7 +47,7 @@ class AuthRepositoryImpl @Inject constructor(
                                 subscriptionActive = dto.subscriptionActive ?: false,
                                 dateFin = dto.dateFin,
                                 accessProof = dto.accessProof,
-                            )
+                            ),
                         )
                     }
                     dto.status == "pending_payment" -> {
@@ -56,7 +56,7 @@ class AuthRepositoryImpl @Inject constructor(
                                 userId = dto.userId,
                                 paymentTrackingToken = dto.paymentTrackingToken,
                                 paymentUrl = dto.paymentUrl,
-                            )
+                            ),
                         )
                     }
                     else -> {
@@ -65,7 +65,7 @@ class AuthRepositoryImpl @Inject constructor(
                                 code = "AUTH_ERROR",
                                 message = erreur ?: "Identifiant ou mot de passe incorrect.",
                                 httpStatus = 200,
-                            )
+                            ),
                         )
                     }
                 }
@@ -84,7 +84,7 @@ class AuthRepositoryImpl @Inject constructor(
                     pays = form.pays,
                     codeParrain = form.codeParrain,
                     motDePasse = form.motDePasse,
-                )
+                ),
             )
         }
         return when (result) {
@@ -94,7 +94,7 @@ class AuthRepositoryImpl @Inject constructor(
                 val erreur = dto.erreur ?: dto.message
                 if (!erreur.isNullOrBlank() && dto.paymentUrl == null) {
                     DsiResult.Error(
-                        AppError.Http(code = "INSCRIPTION_ERROR", message = erreur, httpStatus = 200)
+                        AppError.Http(code = "INSCRIPTION_ERROR", message = erreur, httpStatus = 200),
                     )
                 } else {
                     DsiResult.Success(
@@ -102,7 +102,7 @@ class AuthRepositoryImpl @Inject constructor(
                             userId = dto.userId,
                             paymentTrackingToken = dto.paymentTrackingToken,
                             paymentUrl = dto.paymentUrl,
-                        )
+                        ),
                     )
                 }
             }
@@ -120,7 +120,7 @@ class AuthRepositoryImpl @Inject constructor(
                 val erreur = dto.erreur ?: dto.message
                 if (!erreur.isNullOrBlank() && dto.status == null) {
                     DsiResult.Error(
-                        AppError.Http(code = "PAIEMENT_ERROR", message = erreur, httpStatus = 200)
+                        AppError.Http(code = "PAIEMENT_ERROR", message = erreur, httpStatus = 200),
                     )
                 } else {
                     DsiResult.Success(dto.status ?: "inconnu")

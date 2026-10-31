@@ -4,26 +4,25 @@ import app.dsiacademy.academy.core.common.AppError
 import app.dsiacademy.academy.core.common.DsiResult
 import app.dsiacademy.academy.core.network.safeCall
 import app.dsiacademy.academy.data.member.api.MemberApi
-import app.dsiacademy.academy.data.member.dto.asDouble
 import app.dsiacademy.academy.data.member.dto.DemandeRetraitRequestDto
 import app.dsiacademy.academy.data.member.dto.RenouvelerRequestDto
-import app.dsiacademy.academy.domain.member.DemandeRetraitResult
-import app.dsiacademy.academy.domain.member.PaiementItem
-import app.dsiacademy.academy.domain.member.PaiementsPage
-import app.dsiacademy.academy.domain.member.GiftCodeResult
-import app.dsiacademy.academy.domain.member.RenouvelerResult
-import app.dsiacademy.academy.domain.member.RetraitEvenement
 import app.dsiacademy.academy.data.member.dto.UtiliserCodeRequestDto
-import app.dsiacademy.academy.domain.member.RetraitItem
-import app.dsiacademy.academy.domain.member.RetraitsList
-
+import app.dsiacademy.academy.data.member.dto.asDouble
+import app.dsiacademy.academy.domain.member.DemandeRetraitResult
+import app.dsiacademy.academy.domain.member.GiftCodeResult
 import app.dsiacademy.academy.domain.member.MemberAbonnement
 import app.dsiacademy.academy.domain.member.MemberDashboard
 import app.dsiacademy.academy.domain.member.MemberParrainage
 import app.dsiacademy.academy.domain.member.MemberProfil
 import app.dsiacademy.academy.domain.member.MemberRepository
 import app.dsiacademy.academy.domain.member.MemberSolde
+import app.dsiacademy.academy.domain.member.PaiementItem
+import app.dsiacademy.academy.domain.member.PaiementsPage
 import app.dsiacademy.academy.domain.member.ParrainageLigne
+import app.dsiacademy.academy.domain.member.RenouvelerResult
+import app.dsiacademy.academy.domain.member.RetraitEvenement
+import app.dsiacademy.academy.domain.member.RetraitItem
+import app.dsiacademy.academy.domain.member.RetraitsList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
@@ -59,7 +58,7 @@ class MemberRepositoryImpl @Inject constructor(
                             whatsapp = d.whatsapp ?: d.telephone,
                             email = d.email,
                             pays = d.pays,
-                        )
+                        ),
                     )
                 }
             }
@@ -81,7 +80,7 @@ class MemberRepositoryImpl @Inject constructor(
                             soldeDsiActuel = d.soldeDsiActuel.asDouble(),
                             totalDsiGagnes = d.totalDsiGagnes.asDouble(),
                             dateMiseAJour = d.dateMiseAJour,
-                        )
+                        ),
                     )
                 }
             }
@@ -105,7 +104,7 @@ class MemberRepositoryImpl @Inject constructor(
                             formule = d.formule,
                             modePaiement = d.modePaiement,
                             renouvellements = d.renouvellements,
-                        )
+                        ),
                     )
                 }
             }
@@ -137,7 +136,7 @@ class MemberRepositoryImpl @Inject constructor(
                                     date = it.date,
                                 )
                             },
-                        )
+                        ),
                     )
                 }
             }
@@ -163,7 +162,7 @@ class MemberRepositoryImpl @Inject constructor(
                 solde = solde,
                 abonnement = abo,
                 retraits = retraits,
-            )
+            ),
         )
     }
 
@@ -219,7 +218,7 @@ class MemberRepositoryImpl @Inject constructor(
                     montantDsi = montantDsi,
                     moyenPaiement = moyenPaiement,
                     numeroPaiement = numeroPaiement,
-                )
+                ),
             )
         }
         return when (result) {
@@ -233,7 +232,7 @@ class MemberRepositoryImpl @Inject constructor(
                         message = d.message ?: d.erreur,
                         montantDsiNet = d.montantDsiNet?.asDouble(),
                         montantFcfaNet = d.montantFcfaNet?.asDouble(),
-                    )
+                    ),
                 )
             }
         }
@@ -266,7 +265,7 @@ class MemberRepositoryImpl @Inject constructor(
                             page = d.page ?: page,
                             totalPages = d.totalPages ?: 1,
                             total = d.total ?: liste.size,
-                        )
+                        ),
                     )
                 }
             }
@@ -286,7 +285,7 @@ class MemberRepositoryImpl @Inject constructor(
                         status = d.status ?: "refuse",
                         paymentUrl = d.paymentUrl,
                         message = d.message ?: d.erreur,
-                    )
+                    ),
                 )
             }
         }
@@ -314,7 +313,7 @@ class MemberRepositoryImpl @Inject constructor(
                         GiftCodeResult.Success(
                             montantDsi = d.montantDsi.asDouble(),
                             message = d.message,
-                        )
+                        ),
                     )
                 } else {
                     val msg = (d.message ?: d.erreur ?: "").lowercase()
@@ -345,7 +344,7 @@ class MemberRepositoryImpl @Inject constructor(
                                 ancienneValeur = it.ancienneValeur,
                                 nouvelleValeur = it.nouvelleValeur,
                             )
-                        }
+                        },
                     )
                 }
             }

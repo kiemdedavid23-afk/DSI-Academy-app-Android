@@ -86,7 +86,9 @@ class LocalContentStores @Inject constructor(
             icon = j.optString("icon", "📌"),
             progress = if (j.has("progress") && !j.isNull("progress")) j.optInt("progress") else null,
         )
-    } catch (_: Exception) { null }
+    } catch (_: Exception) {
+        null
+    }
 
     private fun parseFavorites(raw: String): List<FavoriteEntry> = try {
         val arr = JSONArray(raw)
@@ -103,5 +105,7 @@ class LocalContentStores @Inject constructor(
                 )
             }
         }
-    } catch (_: Exception) { emptyList() }
+    } catch (_: Exception) {
+        emptyList()
+    }
 }

@@ -23,7 +23,6 @@ interface ContentApi {
     @GET("content/{id}/assets/best")
     suspend fun getBestAsset(@Path("id") id: String): BestAssetDto
 
-
     @GET("content/categories")
     suspend fun getCategories(@Query("type") type: String): CategoriesDto
 

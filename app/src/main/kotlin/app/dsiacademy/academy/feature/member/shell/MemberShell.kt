@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DrawerValue
@@ -43,8 +42,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameMillis
-import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,12 +58,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.dsiacademy.academy.R
 import app.dsiacademy.academy.core.config.SocialLinks
-import app.dsiacademy.academy.core.designsystem.icons.SocialIcon
 import app.dsiacademy.academy.core.designsystem.components.MemberAvatar
 import app.dsiacademy.academy.core.designsystem.icons.DsiIcon
 import app.dsiacademy.academy.core.designsystem.icons.DsiIcons
+import app.dsiacademy.academy.core.designsystem.icons.SocialIcon
 import app.dsiacademy.academy.core.designsystem.theme.FrauncesFamily
 import app.dsiacademy.academy.core.designsystem.theme.ManropeFamily
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val Surface = Color(0xFFFFFFFF)
@@ -79,7 +77,6 @@ private val BluePrimary = Color(0xFF1E40AF)
 private val RoyalStart = Color(0xFF0A1B54)
 private val RoyalEnd = Color(0xFF1D4ED8)
 private val GoldText = Color(0xFF8C6A12)
-
 
 @Composable
 fun MemberShell(
@@ -108,7 +105,10 @@ fun MemberShell(
             title = { Text("Déconnexion", fontFamily = ManropeFamily, fontWeight = FontWeight.Bold) },
             text = { Text("Voulez-vous vraiment vous déconnecter ?", fontFamily = ManropeFamily) },
             confirmButton = {
-                TextButton(onClick = { confirmLogout = false; onLogout() }) {
+                TextButton(onClick = {
+                    confirmLogout = false
+                    onLogout()
+                }) {
                     Text("Se déconnecter", color = Color(0xFFB91C1C))
                 }
             },
@@ -554,9 +554,15 @@ private fun MemberDrawerContent(
                         .clip(CircleShape)
                         .background(if (enabled) Color(0xFFF1F5F9) else Color(0xFFF8FAFC))
                         .then(
-                            if (enabled) Modifier.clickable {
-                                try { uriHandler.openUri(link.href!!) } catch (_: Exception) {}
-                            } else Modifier
+                            if (enabled) {
+                                Modifier.clickable {
+                                    try {
+                                        uriHandler.openUri(link.href!!)
+                                    } catch (_: Exception) {}
+                                }
+                            } else {
+                                Modifier
+                            },
                         ),
                     contentAlignment = Alignment.Center,
                 ) {

@@ -59,7 +59,9 @@ fun ContentDetailScreen(
                 Spacer(Modifier.height(6.dp))
                 Text(
                     "Formation — ouvrez un module (jamais deliver sur l'id formation).",
-                    fontFamily = ManropeFamily, fontSize = 13.sp, color = TextM,
+                    fontFamily = ManropeFamily,
+                    fontSize = 13.sp,
+                    color = TextM,
                 )
                 Spacer(Modifier.height(16.dp))
                 FormationTreeList(tree.children, onPlay)
@@ -68,7 +70,8 @@ fun ContentDetailScreen(
                 val item = state.item!!
                 item.coverUrl?.let {
                     AsyncImage(
-                        model = it, contentDescription = null,
+                        model = it,
+                        contentDescription = null,
                         modifier = Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(14.dp)),
                         contentScale = ContentScale.Crop,
                     )

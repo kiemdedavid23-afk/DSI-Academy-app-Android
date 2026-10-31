@@ -3,8 +3,8 @@ package app.dsiacademy.academy.feature.member.shell
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.dsiacademy.academy.core.common.DsiResult
-import app.dsiacademy.academy.data.community.CommunityRepository
 import app.dsiacademy.academy.core.session.PreferencesStore
+import app.dsiacademy.academy.data.community.CommunityRepository
 import app.dsiacademy.academy.domain.member.MemberRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
