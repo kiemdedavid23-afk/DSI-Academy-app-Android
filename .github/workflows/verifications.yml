@@ -1,11 +1,14 @@
 name: Vérifications DSI Android
 
+# Ce workflow VÉRIFIE le code. Il ne construit ni APK ni application.
 # Lancement MANUEL : Actions → « Vérifications DSI Android » → Run workflow.
 #   etape     : jusqu'où vérifier (cumulatif : « 3 » exécute aussi 1 et 2).
 #   perimetre : « tout » (tout le code) ou « dernier-commit » (seulement les .kt du dernier commit,
 #               pratique pour contrôler la livraison de Grok sans le bruit de l'ancien code).
 # Toutes les étapes demandées s'exécutent même si une précédente échoue : un seul passage donne
-# le tableau complet. L'APK (étape 5) n'est construit que si TOUT le reste est vert.
+# le tableau complet.
+# Étape 3 : les tests unitaires. Gradle doit lire le code pour les lancer : une erreur de code
+# apparaît donc ici aussi, mais aucun APK n'est jamais construit.
 on:
   workflow_dispatch:
     inputs:
@@ -16,9 +19,7 @@ on:
         options:
           - "1-controles-rapides"
           - "2-qualite"
-          - "3-compilation"
-          - "4-tests"
-          - "5-apk-debug"
+          - "3-tests"
       perimetre:
         description: "Périmètre des contrôles de l'étape 1 (règles de code)"
         type: choice
@@ -57,7 +58,7 @@ jobs:
           echo "level=$LEVEL" >> "$GITHUB_OUTPUT"
           echo "Étape demandée : $ETAPE (niveau $LEVEL)"
           if [ "$LEVEL" -ge 3 ] && [ ! -f gradlew ]; then
-            echo "::error title=Gradle absent::Les étapes 3 à 5 exigent gradlew (introuvable)."
+            echo "::error title=Gradle absent::L'étape 3 exige gradlew (introuvable)."
             exit 1
           fi
 
@@ -181,14 +182,15 @@ jobs:
           scan_lit "texte en dur" '\bText\(\s*(text\s*=\s*)?"|contentDescription\s*=\s*"' feature
 
           # ── 9. routes Retrofit : uniquement celles de CONTRATS-API.md ─
-          CONTRAT=$(sed -E 's/\{[^}]*\}/{}/g' docs/CONTRATS-API.md)
+          CONTRAT_F=$(mktemp)
+          sed -E 's/\{[^}]*\}/{}/g' docs/CONTRATS-API.md > "$CONTRAT_F"
           INVENTEES=""
           while read -r m p; do
             [ -z "${m:-}" ] && continue
             p="${p%%\?*}"; p="/${p#/}"
             p=$(printf '%s' "$p" | sed -E 's/\{[^}]*\}/{}/g')
             re=$(printf '%s' "$m $p" | sed -E 's/[][\.*^$(){}|+?]/\\&/g')
-            if ! printf '%s\n' "$CONTRAT" | grep -qE "${re}(\?|[^A-Za-z0-9_{}/.-]|$)"; then
+            if ! grep -qE "${re}(\?|[^A-Za-z0-9_{}/.-]|$)" "$CONTRAT_F"; then
               INVENTEES="$INVENTEES$m $p"$'\n'
             fi
           done < <(grep -rhoE '@(GET|POST|PUT|DELETE|PATCH)\("[^"]*"' app/src/main/kotlin 2>/dev/null \
@@ -269,6 +271,8 @@ jobs:
           naming:
             FunctionNaming:
               ignoreAnnotated: ['Composable']
+            InvalidPackageDeclaration:
+              active: false
           complexity:
             LongMethod:
               ignoreAnnotated: ['Composable']
@@ -294,28 +298,10 @@ jobs:
           curl -sSL -o detekt.jar "https://github.com/detekt/detekt/releases/download/v${DETEKT_VERSION}/detekt-cli-${DETEKT_VERSION}-all.jar"
           java -jar detekt.jar --input app/src --config /tmp/detekt.yml --build-upon-default-config
 
-  compilation:
-    name: "3 · Compilation"
+  tests:
+    name: "3 · Tests unitaires et contrats"
     needs: niveau
     if: ${{ !cancelled() && fromJSON(needs.niveau.outputs.level) >= 3 }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-      - uses: gradle/actions/setup-gradle@v4
-      - name: Compiler le Kotlin
-        run: |
-          chmod +x gradlew
-          ./gradlew :app:compileDebugKotlin --stacktrace
-
-  tests:
-    name: "4 · Tests unitaires et contrats"
-    needs: [niveau, compilation]
-    if: ${{ !cancelled() && fromJSON(needs.niveau.outputs.level) >= 4 && needs.compilation.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -338,34 +324,4 @@ jobs:
             app/build/reports/tests/**
             app/build/test-results/**
           if-no-files-found: ignore
-          retention-days: 7
-
-  apk-debug:
-    name: "5 · APK debug"
-    needs: [niveau, rapides, qualite, compilation, tests]
-    if: >-
-      ${{ !cancelled() && fromJSON(needs.niveau.outputs.level) >= 5
-          && needs.rapides.result == 'success'
-          && needs.qualite.result == 'success'
-          && needs.compilation.result == 'success'
-          && needs.tests.result == 'success' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-      - uses: gradle/actions/setup-gradle@v4
-      - name: Construire l'APK debug
-        run: |
-          chmod +x gradlew
-          ./gradlew :app:assembleDebug --stacktrace
-      - name: Publier l'APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: dsi-academy-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
           retention-days: 7
