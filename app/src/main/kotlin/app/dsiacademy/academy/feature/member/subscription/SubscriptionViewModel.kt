@@ -2,39 +2,24 @@ package app.dsiacademy.academy.feature.member.subscription
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.dsiacademy.academy.core.common.AppError
 import app.dsiacademy.academy.core.common.DsiResult
-import app.dsiacademy.academy.domain.member.MemberAbonnement
 import app.dsiacademy.academy.domain.member.MemberRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.Channel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-data class SubscriptionUiState(
-    val abo: MemberAbonnement? = null,
-    val loading: Boolean = true,
-    val renewing: Boolean = false,
-    val error: String? = null,
-    val message: String? = null,
-)
-
-sealed interface SubEvent {
-    data class OpenUrl(val url: String) : SubEvent
-}
 
 @HiltViewModel
 class SubscriptionViewModel @Inject constructor(
     private val repo: MemberRepository,
 ) : ViewModel() {
+
     private val _state = MutableStateFlow(SubscriptionUiState())
     val state: StateFlow<SubscriptionUiState> = _state.asStateFlow()
-    private val _events = Channel<SubEvent>(Channel.BUFFERED)
-    val events = _events.receiveAsFlow()
 
     init {
         charger()
@@ -42,39 +27,132 @@ class SubscriptionViewModel @Inject constructor(
 
     fun charger() {
         viewModelScope.launch {
-            _state.update { it.copy(loading = true, error = null) }
+            _state.update {
+                it.copy(
+                    loading = true,
+                    sessionExpired = false,
+                    loadFailed = false,
+                    errorMessage = null,
+                )
+            }
             when (val r = repo.getAbonnement()) {
-                is DsiResult.Error -> _state.update {
-                    it.copy(loading = false, error = r.error.message ?: "Impossible de charger l'abonnement.")
+                is DsiResult.Error -> {
+                    val expired = r.error is AppError.SessionExpired
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            sessionExpired = expired,
+                            loadFailed = !expired,
+                            errorMessage = if (expired) null else r.error.message,
+                        )
+                    }
                 }
-                is DsiResult.Success -> _state.update {
-                    it.copy(loading = false, abo = r.data)
+                is DsiResult.Success -> {
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            abo = r.data,
+                            sessionExpired = false,
+                            loadFailed = false,
+                            errorMessage = null,
+                        )
+                    }
                 }
             }
         }
     }
 
-    fun renouveler(mode: String) {
+    fun openPanel() {
+        _state.update { it.copy(panel = RenewPanel.ChooseMode, feedback = null, paymentLink = null) }
+    }
+
+    fun closePanel() {
+        _state.update {
+            it.copy(
+                panel = RenewPanel.Closed,
+                feedback = null,
+                paymentLink = null,
+            )
+        }
+    }
+
+    fun chooseDsi() {
+        _state.update { it.copy(panel = RenewPanel.ConfirmDsi, feedback = null) }
+    }
+
+    fun backToChoice() {
+        _state.update { it.copy(panel = RenewPanel.ChooseMode, feedback = null) }
+    }
+
+    fun renewFcfa() {
         viewModelScope.launch {
-            _state.update { it.copy(renewing = true, error = null, message = null) }
-            when (val r = repo.renouvelerAbonnement(mode)) {
+            _state.update {
+                it.copy(renewing = true, feedback = null, paymentLink = null)
+            }
+            when (val r = repo.renouvelerAbonnement("fcfa")) {
                 is DsiResult.Error -> _state.update {
-                    it.copy(renewing = false, error = r.error.message ?: "Renouvellement échoué.")
+                    it.copy(
+                        renewing = false,
+                        feedback = RenewFeedback.Error(r.error.message, FeedbackKind.Server),
+                    )
+                }
+                is DsiResult.Success -> {
+                    val status = r.data.status
+                    val url = r.data.paymentUrl
+                    if (status == "pending_payment" && !url.isNullOrBlank() && url.startsWith("https://")) {
+                        _state.update {
+                            it.copy(renewing = false, paymentLink = url)
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                renewing = false,
+                                feedback = RenewFeedback.Error(null, FeedbackKind.Unexpected),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun confirmDsi() {
+        viewModelScope.launch {
+            _state.update { it.copy(renewing = true, feedback = null) }
+            when (val r = repo.renouvelerAbonnement("dsi")) {
+                is DsiResult.Error -> _state.update {
+                    it.copy(
+                        renewing = false,
+                        feedback = RenewFeedback.Error(r.error.message, FeedbackKind.Server),
+                    )
                 }
                 is DsiResult.Success -> {
                     when (r.data.status) {
-                        "pending_payment" -> {
-                            _state.update { it.copy(renewing = false, message = "Paiement en attente…") }
-                            r.data.paymentUrl?.let { _events.send(SubEvent.OpenUrl(it)) }
-                        }
                         "active" -> {
                             _state.update {
-                                it.copy(renewing = false, message = r.data.message ?: "Abonnement activé.")
+                                it.copy(
+                                    renewing = false,
+                                    panel = RenewPanel.Closed,
+                                    feedback = RenewFeedback.Success(r.data.message),
+                                    paymentLink = null,
+                                )
                             }
                             charger()
                         }
+                        "refuse" -> _state.update {
+                            it.copy(
+                                renewing = false,
+                                feedback = RenewFeedback.Error(
+                                    r.data.message,
+                                    FeedbackKind.Refused,
+                                ),
+                            )
+                        }
                         else -> _state.update {
-                            it.copy(renewing = false, error = r.data.message ?: "Renouvellement refusé.")
+                            it.copy(
+                                renewing = false,
+                                feedback = RenewFeedback.Error(null, FeedbackKind.Unexpected),
+                            )
                         }
                     }
                 }
