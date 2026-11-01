@@ -70,4 +70,49 @@ class DsiFormatsTest {
         assertEquals("0", DsiFormats.formatDsiAmount(Double.NaN))
         assertEquals("0", DsiFormats.formatDsiAmount(Double.POSITIVE_INFINITY))
     }
+
+
+    @Test
+    fun formatLongDate_fr_jour12_mars_utc() {
+        val ms = DsiFormats.parseIsoMs("2027-03-12")!!
+        val s = DsiFormats.formatLongDate(ms, english = false, zone = TimeZone.getTimeZone("UTC"))
+        assertEquals("12 mars 2027", s)
+    }
+
+    @Test
+    fun formatLongDate_fr_jour1_janvier_utc() {
+        val ms = DsiFormats.parseIsoMs("2027-01-01")!!
+        val s = DsiFormats.formatLongDate(ms, english = false, zone = TimeZone.getTimeZone("UTC"))
+        assertEquals("1 janvier 2027", s)
+    }
+
+    @Test
+    fun formatLongDate_en_mars_utc() {
+        val ms = DsiFormats.parseIsoMs("2027-03-12")!!
+        val s = DsiFormats.formatLongDate(ms, english = true, zone = TimeZone.getTimeZone("UTC"))
+        assertEquals("March 12, 2027", s)
+    }
+
+    @Test
+    fun formatLongDate_en_decembre_utc() {
+        val ms = DsiFormats.parseIsoMs("2027-12-01")!!
+        val s = DsiFormats.formatLongDate(ms, english = true, zone = TimeZone.getTimeZone("UTC"))
+        assertEquals("December 1, 2027", s)
+    }
+
+    @Test
+    fun formatGroupedInt_fr() {
+        assertEquals("0", DsiFormats.formatGroupedInt(0, english = false))
+        assertEquals("999", DsiFormats.formatGroupedInt(999, english = false))
+        assertEquals("2 500", DsiFormats.formatGroupedInt(2500, english = false))
+        assertEquals("1 234 567", DsiFormats.formatGroupedInt(1_234_567, english = false))
+    }
+
+    @Test
+    fun formatGroupedInt_en() {
+        assertEquals("0", DsiFormats.formatGroupedInt(0, english = true))
+        assertEquals("999", DsiFormats.formatGroupedInt(999, english = true))
+        assertEquals("2,500", DsiFormats.formatGroupedInt(2500, english = true))
+        assertEquals("1,234,567", DsiFormats.formatGroupedInt(1_234_567, english = true))
+    }
 }
