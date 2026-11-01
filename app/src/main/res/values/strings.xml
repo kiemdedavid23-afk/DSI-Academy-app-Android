@@ -123,5 +123,56 @@
     <string name="common_cancel">Annuler</string>
     <string name="common_back">Retour</string>
 
+
+    <!-- Mes DSI (site dsi.*) -->
+    <string name="dsi_title">Mes DSI</string>
+    <string name="dsi_subtitle">Consultez votre solde DSI et vos retraits récents dans l\'écosystème DSI Academy.</string>
+    <string name="dsi_session_expired">Votre session a expiré. Veuillez vous reconnecter.</string>
+    <string name="dsi_error_balance">Impossible de récupérer votre solde pour le moment.</string>
+    <string name="dsi_error_withdrawals">Impossible de récupérer vos retraits pour le moment.</string>
+    <string name="dsi_balance_label">SOLDE DSI DISPONIBLE</string>
+    <string name="dsi_balance_description">Vos unités d\'accès et de services au sein de l\'Académie DSI.</string>
+    <string name="dsi_use_button">Utiliser mes DSI</string>
+    <string name="dsi_use_title">Où souhaitez-vous utiliser vos DSI ?</string>
+    <string name="dsi_use_subscription">Abonnement</string>
+    <string name="dsi_use_subscription_desc">Renouvelez ou prolongez votre accès.</string>
+    <string name="dsi_use_shop">Boutique</string>
+    <string name="dsi_use_shop_desc">Parcourez la boutique de l\'Académie.</string>
+    <string name="dsi_use_marketplace">Marketplace</string>
+    <string name="dsi_use_marketplace_desc">Parcourez les offres des vendeurs.</string>
+    <string name="dsi_gift_banner_title">J\'ai reçu un cadeau</string>
+    <string name="dsi_gift_banner_text">Saisissez votre code de récompense pour le récupérer.</string>
+    <string name="dsi_gift_open">Saisir mon code</string>
+    <string name="dsi_stat_earned">Total DSI gagnés</string>
+    <string name="dsi_stat_earned_note">Cumul des récompenses obtenues</string>
+    <string name="dsi_stat_updated">Dernière mise à jour</string>
+    <string name="dsi_stat_updated_note">Synchronisation avec votre compte DSI</string>
+    <string name="dsi_recent_withdrawals">Derniers retraits</string>
+    <string name="dsi_recent_subtitle">Vos dernières demandes de retrait DSI.</string>
+    <string name="dsi_empty_withdrawals">Aucun retrait pour le moment.</string>
+    <string name="dsi_withdrawal_label">Retrait DSI</string>
+    <string name="dsi_view_all_withdrawals">Voir tous mes retraits</string>
+    <string name="dsi_history_title">Historique détaillé des mouvements</string>
+    <string name="dsi_history_subtitle">Journal complet des transactions et allocations DSI.</string>
+    <string name="dsi_history_soon">Cette fonctionnalité sera bientôt disponible.</string>
+    <string name="dsi_gift_eyebrow">CODE DE RÉCOMPENSE</string>
+    <string name="dsi_gift_title">Vous avez reçu un cadeau</string>
+    <string name="dsi_gift_intro">Entrez le code qui vous a été remis pour récupérer votre récompense.</string>
+    <string name="dsi_gift_label">Votre code</string>
+    <string name="dsi_gift_placeholder">Saisissez votre code</string>
+    <string name="dsi_gift_submit">Valider mon code</string>
+    <string name="dsi_gift_submitting">Vérification…</string>
+    <string name="dsi_gift_close">Fermer</string>
+    <string name="dsi_gift_note">La validité du code est vérifiée par l\'Académie.</string>
+    <string name="dsi_gift_success_title">Cadeau récupéré</string>
+    <string name="dsi_gift_success_amount">%1$s DSI ont été ajoutés à votre solde.</string>
+    <string name="dsi_gift_success_default">Votre récompense a bien été prise en compte.</string>
+    <string name="dsi_gift_done">Terminer</string>
+    <string name="dsi_gift_error_empty">Saisissez votre code pour continuer.</string>
+    <string name="dsi_gift_error_invalid">Ce code est invalide ou a expiré.</string>
+    <string name="dsi_gift_error_session">Votre session a expiré. Veuillez vous reconnecter.</string>
+    <string name="dsi_gift_error_unavailable">Impossible de vérifier ce code pour le moment.</string>
+    <string name="dsi_gift_error_already_used">Vous avez déjà utilisé ce code.</string>
+
 </resources>
 
