@@ -62,4 +62,36 @@
     <string name="home_library">Library</string>
     <string name="home_formations">Courses</string>
 
+
+    <!-- Subscription -->
+    <string name="subscription_title">My subscription</string>
+    <string name="subscription_subtitle">Check the status of your academic access and your renewal deadlines.</string>
+    <string name="subscription_session_expired">Your session has expired. Please log in again.</string>
+    <string name="subscription_error_default">Unable to load your subscription.</string>
+    <string name="subscription_empty">No active subscription at the moment.</string>
+    <string name="subscription_current_access">CURRENT ACCESS</string>
+    <string name="subscription_start_date">Start date</string>
+    <string name="subscription_end_date">End date</string>
+    <string name="subscription_payment_mode">Payment method</string>
+    <string name="subscription_mode_founder">Founder account</string>
+    <string name="subscription_renew_button">Renew my access</string>
+    <string name="subscription_choose_mode">Choose a payment method</string>
+    <string name="subscription_pay_fcfa">Pay in FCFA</string>
+    <string name="subscription_pay_dsi">Pay with my DSI</string>
+    <string name="subscription_confirm_warning">This action will immediately debit &lt;b&gt;%1$s DSI&lt;/b&gt; from your balance and extend your subscription. This action cannot be undone once confirmed.</string>
+    <string name="subscription_confirm_debit">Confirm the debit of %1$s DSI</string>
+    <string name="subscription_processing">Processing...</string>
+    <string name="subscription_continue_payment">Continue payment →</string>
+    <string name="subscription_action_note">Academic access guaranteed by DSI Academy</string>
+    <string name="subscription_history_title">Renewal history</string>
+    <string name="subscription_history_empty">No renewal history available at the moment.</string>
+    <string name="subscription_renewal_label">Renewal</string>
+    <string name="subscription_mode_label">Method:</string>
+    <string name="subscription_new_due_date">New due date:</string>
+    <string name="subscription_renew_success">Subscription renewed with your DSI.</string>
+    <string name="subscription_renew_refused">Renewal refused.</string>
+    <string name="subscription_unexpected_response">Unexpected response from the payment service.</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_back">Back</string>
+
 </resources>
