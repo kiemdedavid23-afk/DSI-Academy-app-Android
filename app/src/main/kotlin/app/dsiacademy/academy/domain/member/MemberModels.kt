@@ -21,14 +21,39 @@ data class MemberSolde(
     val dateMiseAJour: String?,
 )
 
+data class RenouvellementItem(
+    val date: String?,
+    val statut: String?,
+    val modePaiement: String?,
+    val nouvelleDateFin: String?,
+)
+
+enum class SubscriptionTone {
+    Active,
+    Warning,
+    Neutral,
+}
+
 data class MemberAbonnement(
     val statut: String?,
     val dateDebut: String?,
     val dateFin: String?,
     val formule: String?,
     val modePaiement: String?,
-    val renouvellements: Int?,
+    val renouvellements: List<RenouvellementItem> = emptyList(),
 ) {
+    /** Comme Boolean(abonnement?.formule) côté site. */
+    val hasFormula: Boolean
+        get() = !formule.isNullOrBlank()
+
+    /** Comme CLASSE_PASTILLE du site. */
+    val tone: SubscriptionTone
+        get() = when (etatAffiche) {
+            "active" -> SubscriptionTone.Active
+            "expired" -> SubscriptionTone.Warning
+            else -> SubscriptionTone.Neutral
+        }
+
     /**
      * Règle exacte site (computeSubscription + CONTRATS §2.6) :
      * - dateFin valide et future → active (+ jours, percent)
@@ -64,19 +89,8 @@ data class MemberAbonnement(
         }
 }
 
-private fun parseDateMs(raw: String?): Long? {
-    if (raw.isNullOrBlank()) return null
-    return try {
-        // ISO-8601 partial support
-        java.time.Instant.parse(raw).toEpochMilli()
-    } catch (_: Exception) {
-        try {
-            java.time.LocalDate.parse(raw.take(10)).atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
-        } catch (_: Exception) {
-            null
-        }
-    }
-}
+private fun parseDateMs(raw: String?): Long? =
+    app.dsiacademy.academy.core.common.DsiFormats.parseIsoMs(raw)
 
 data class MemberParrainage(
     val codeParrainagePersonnel: String,
