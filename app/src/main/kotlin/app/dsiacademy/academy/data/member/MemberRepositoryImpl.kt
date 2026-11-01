@@ -4,6 +4,7 @@ import app.dsiacademy.academy.core.common.AppError
 import app.dsiacademy.academy.core.common.DsiResult
 import app.dsiacademy.academy.core.network.safeCall
 import app.dsiacademy.academy.data.member.api.MemberApi
+import app.dsiacademy.academy.data.member.dto.toRenouvellementItems
 import app.dsiacademy.academy.data.member.dto.DemandeRetraitRequestDto
 import app.dsiacademy.academy.data.member.dto.RenouvelerRequestDto
 import app.dsiacademy.academy.data.member.dto.UtiliserCodeRequestDto
@@ -103,7 +104,7 @@ class MemberRepositoryImpl @Inject constructor(
                             dateFin = d.dateFin,
                             formule = d.formule,
                             modePaiement = d.modePaiement,
-                            renouvellements = d.renouvellements,
+                            renouvellements = d.renouvellements.toRenouvellementItems(),
                         ),
                     )
                 }
