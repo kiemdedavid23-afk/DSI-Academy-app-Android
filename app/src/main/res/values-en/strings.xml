@@ -94,4 +94,55 @@
     <string name="common_cancel">Cancel</string>
     <string name="common_back">Back</string>
 
+
+    <!-- My DSI -->
+    <string name="dsi_title">My DSI</string>
+    <string name="dsi_subtitle">View your DSI balance and recent withdrawals in the DSI Academy ecosystem.</string>
+    <string name="dsi_session_expired">Your session has expired. Please log in again.</string>
+    <string name="dsi_error_balance">Unable to retrieve your balance at the moment.</string>
+    <string name="dsi_error_withdrawals">Unable to retrieve your withdrawals at the moment.</string>
+    <string name="dsi_balance_label">AVAILABLE DSI BALANCE</string>
+    <string name="dsi_balance_description">Your access and service units within the DSI Academy.</string>
+    <string name="dsi_use_button">Use my DSI</string>
+    <string name="dsi_use_title">Where would you like to use your DSI?</string>
+    <string name="dsi_use_subscription">Subscription</string>
+    <string name="dsi_use_subscription_desc">Renew or extend your access.</string>
+    <string name="dsi_use_shop">Shop</string>
+    <string name="dsi_use_shop_desc">Browse the Academy shop.</string>
+    <string name="dsi_use_marketplace">Marketplace</string>
+    <string name="dsi_use_marketplace_desc">Browse offers from sellers.</string>
+    <string name="dsi_gift_banner_title">I received a gift</string>
+    <string name="dsi_gift_banner_text">Enter your reward code to claim it.</string>
+    <string name="dsi_gift_open">Enter my code</string>
+    <string name="dsi_stat_earned">Total DSI earned</string>
+    <string name="dsi_stat_earned_note">Total rewards received</string>
+    <string name="dsi_stat_updated">Last updated</string>
+    <string name="dsi_stat_updated_note">Synchronized with your DSI account</string>
+    <string name="dsi_recent_withdrawals">Recent withdrawals</string>
+    <string name="dsi_recent_subtitle">Your latest DSI withdrawal requests.</string>
+    <string name="dsi_empty_withdrawals">No withdrawals yet.</string>
+    <string name="dsi_withdrawal_label">DSI withdrawal</string>
+    <string name="dsi_view_all_withdrawals">View all my withdrawals</string>
+    <string name="dsi_history_title">Detailed movement history</string>
+    <string name="dsi_history_subtitle">Full log of DSI transactions and allocations.</string>
+    <string name="dsi_history_soon">This feature will be available soon.</string>
+    <string name="dsi_gift_eyebrow">REWARD CODE</string>
+    <string name="dsi_gift_title">You received a gift</string>
+    <string name="dsi_gift_intro">Enter the code you were given to claim your reward.</string>
+    <string name="dsi_gift_label">Your code</string>
+    <string name="dsi_gift_placeholder">Enter your code</string>
+    <string name="dsi_gift_submit">Validate my code</string>
+    <string name="dsi_gift_submitting">Checking…</string>
+    <string name="dsi_gift_close">Close</string>
+    <string name="dsi_gift_note">The code is verified by the Academy.</string>
+    <string name="dsi_gift_success_title">Gift claimed</string>
+    <string name="dsi_gift_success_amount">%1$s DSI have been added to your balance.</string>
+    <string name="dsi_gift_success_default">Your reward has been recorded.</string>
+    <string name="dsi_gift_done">Done</string>
+    <string name="dsi_gift_error_empty">Enter your code to continue.</string>
+    <string name="dsi_gift_error_invalid">This code is invalid or has expired.</string>
+    <string name="dsi_gift_error_session">Your session has expired. Please log in again.</string>
+    <string name="dsi_gift_error_unavailable">Unable to verify this code at the moment.</string>
+    <string name="dsi_gift_error_already_used">You have already used this code.</string>
+
 </resources>
