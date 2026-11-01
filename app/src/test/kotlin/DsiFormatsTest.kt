@@ -115,4 +115,57 @@ class DsiFormatsTest {
         assertEquals("2,500", DsiFormats.formatGroupedInt(2500, english = true))
         assertEquals("1,234,567", DsiFormats.formatGroupedInt(1_234_567, english = true))
     }
+
+
+    @Test
+    fun formatNumber_fr() {
+        assertEquals("0", DsiFormats.formatNumber(0.0, english = false))
+        assertEquals("999", DsiFormats.formatNumber(999.0, english = false))
+        assertEquals("1\u202F000", DsiFormats.formatNumber(1000.0, english = false))
+        assertEquals("1\u202F234\u202F567", DsiFormats.formatNumber(1_234_567.0, english = false))
+        assertEquals("1\u202F234,5", DsiFormats.formatNumber(1234.5, english = false))
+        assertEquals("0,123", DsiFormats.formatNumber(0.1234, english = false)) // 3 déc. HALF_UP
+        assertEquals("12", DsiFormats.formatNumber(12.0, english = false))
+        assertEquals("-3,5", DsiFormats.formatNumber(-3.5, english = false))
+        assertEquals("0", DsiFormats.formatNumber(Double.NaN, english = false))
+    }
+
+    @Test
+    fun formatNumber_en() {
+        assertEquals("0", DsiFormats.formatNumber(0.0, english = true))
+        assertEquals("999", DsiFormats.formatNumber(999.0, english = true))
+        assertEquals("1,000", DsiFormats.formatNumber(1000.0, english = true))
+        assertEquals("1,234,567", DsiFormats.formatNumber(1_234_567.0, english = true))
+        assertEquals("1,234.5", DsiFormats.formatNumber(1234.5, english = true))
+        assertEquals("0.123", DsiFormats.formatNumber(0.1234, english = true))
+        assertEquals("12", DsiFormats.formatNumber(12.0, english = true))
+        assertEquals("-3.5", DsiFormats.formatNumber(-3.5, english = true))
+        assertEquals("0", DsiFormats.formatNumber(Double.POSITIVE_INFINITY, english = true))
+    }
+
+    @Test
+    fun formatDateTime_fr_utc() {
+        val utc = TimeZone.getTimeZone("UTC")
+        val matin = DsiFormats.parseIsoMs("2027-03-12T08:05:00Z")!!
+        assertEquals("12/03/2027 08:05", DsiFormats.formatDateTime(matin, english = false, zone = utc))
+        val aprem = DsiFormats.parseIsoMs("2027-03-12T14:05:00Z")!!
+        assertEquals("12/03/2027 14:05", DsiFormats.formatDateTime(aprem, english = false, zone = utc))
+        val midi = DsiFormats.parseIsoMs("2027-03-12T12:00:00Z")!!
+        assertEquals("12/03/2027 12:00", DsiFormats.formatDateTime(midi, english = false, zone = utc))
+        val minuit = DsiFormats.parseIsoMs("2027-03-12T00:00:00Z")!!
+        assertEquals("12/03/2027 00:00", DsiFormats.formatDateTime(minuit, english = false, zone = utc))
+    }
+
+    @Test
+    fun formatDateTime_en_utc() {
+        val utc = TimeZone.getTimeZone("UTC")
+        val matin = DsiFormats.parseIsoMs("2027-03-12T08:05:00Z")!!
+        assertEquals("03/12/2027, 08:05 AM", DsiFormats.formatDateTime(matin, english = true, zone = utc))
+        val aprem = DsiFormats.parseIsoMs("2027-03-12T14:05:00Z")!!
+        assertEquals("03/12/2027, 02:05 PM", DsiFormats.formatDateTime(aprem, english = true, zone = utc))
+        val midi = DsiFormats.parseIsoMs("2027-03-12T12:00:00Z")!!
+        assertEquals("03/12/2027, 12:00 PM", DsiFormats.formatDateTime(midi, english = true, zone = utc))
+        val minuit = DsiFormats.parseIsoMs("2027-03-12T00:00:00Z")!!
+        assertEquals("03/12/2027, 12:00 AM", DsiFormats.formatDateTime(minuit, english = true, zone = utc))
+    }
 }
