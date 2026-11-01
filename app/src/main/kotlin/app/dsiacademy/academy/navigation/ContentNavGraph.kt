@@ -31,13 +31,13 @@ fun NavGraphBuilder.contentNavGraph(
             onNavigate = { dest -> goMember(dest) },
             onLogout = { logout() },
             content = {
-            HouseCatalogScreen(
-                onOpenContent = { id, title, type ->
-                    navController.navigate(Routes.contentDetail(id, title, type))
+                HouseCatalogScreen(
+                    onOpenContent = { id, title, type ->
+                        navController.navigate(Routes.contentDetail(id, title, type))
+                    },
+                )
             },
-        ),
-            )
-        }
+        )
     }
 
     composable(
