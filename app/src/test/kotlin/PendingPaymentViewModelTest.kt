@@ -46,7 +46,7 @@ class PendingPaymentViewModelTest {
         PendingPaymentViewModel(authRepository, draftStore)
 
     @Test
-    fun pasDeBrouillon_phaseNoPending() = runTest {
+    fun pasDeBrouillon_phaseNoPending() = runTest(dispatcher) {
         coEvery { draftStore.getDraft() } returns null
         val vm = createVm()
         advanceUntilIdle()
@@ -54,7 +54,7 @@ class PendingPaymentViewModelTest {
     }
 
     @Test
-    fun brouillonSansJeton_phaseNoPending() = runTest {
+    fun brouillonSansJeton_phaseNoPending() = runTest(dispatcher) {
         coEvery { draftStore.getDraft() } returns InscriptionDraft(
             userId = "u1",
             paymentTrackingToken = null,
@@ -66,7 +66,7 @@ class PendingPaymentViewModelTest {
     }
 
     @Test
-    fun brouillonValide_phaseReady() = runTest {
+    fun brouillonValide_phaseReady() = runTest(dispatcher) {
         coEvery { draftStore.getDraft() } returns InscriptionDraft(
             userId = "u1",
             paymentTrackingToken = "tok",
@@ -79,7 +79,7 @@ class PendingPaymentViewModelTest {
     }
 
     @Test
-    fun ouvrirPaiement_urlHttps_emetOpenPaymentUrl() = runTest {
+    fun ouvrirPaiement_urlHttps_emetOpenPaymentUrl() = runTest(dispatcher) {
         coEvery { draftStore.getDraft() } returns InscriptionDraft(
             paymentTrackingToken = "tok",
             paymentUrl = "https://pay.example/x",
@@ -95,7 +95,7 @@ class PendingPaymentViewModelTest {
     }
 
     @Test
-    fun ouvrirPaiement_sansUrl_messageUnavailable() = runTest {
+    fun ouvrirPaiement_sansUrl_messageUnavailable() = runTest(dispatcher) {
         coEvery { draftStore.getDraft() } returns InscriptionDraft(
             paymentTrackingToken = "tok",
             paymentUrl = null,
@@ -107,7 +107,7 @@ class PendingPaymentViewModelTest {
     }
 
     @Test
-    fun ouvrirPaiement_urlNonHttps_messageUnavailable() = runTest {
+    fun ouvrirPaiement_urlNonHttps_messageUnavailable() = runTest(dispatcher) {
         coEvery { draftStore.getDraft() } returns InscriptionDraft(
             paymentTrackingToken = "tok",
             paymentUrl = "http://insecure.example",
@@ -119,7 +119,7 @@ class PendingPaymentViewModelTest {
     }
 
     @Test
-    fun verifier_active_effaceBrouillonEtEmetPaid() = runTest {
+    fun verifier_active_effaceBrouillonEtEmetPaid() = runTest(dispatcher) {
         coEvery { draftStore.getDraft() } returns InscriptionDraft(
             paymentTrackingToken = "tok",
             paymentUrl = "https://pay.example/x",
@@ -137,7 +137,7 @@ class PendingPaymentViewModelTest {
     }
 
     @Test
-    fun verifier_attente_messageWaiting() = runTest {
+    fun verifier_attente_messageWaiting() = runTest(dispatcher) {
         coEvery { draftStore.getDraft() } returns InscriptionDraft(
             paymentTrackingToken = "tok",
             paymentUrl = "https://pay.example/x",
@@ -152,7 +152,7 @@ class PendingPaymentViewModelTest {
     }
 
     @Test
-    fun verifier_refuse_messageRefused_brouillonConserve() = runTest {
+    fun verifier_refuse_messageRefused_brouillonConserve() = runTest(dispatcher) {
         coEvery { draftStore.getDraft() } returns InscriptionDraft(
             paymentTrackingToken = "tok",
             paymentUrl = "https://pay.example/x",
@@ -167,7 +167,7 @@ class PendingPaymentViewModelTest {
     }
 
     @Test
-    fun verifier_erreur_messageUnavailable() = runTest {
+    fun verifier_erreur_messageUnavailable() = runTest(dispatcher) {
         coEvery { draftStore.getDraft() } returns InscriptionDraft(
             paymentTrackingToken = "tok",
             paymentUrl = "https://pay.example/x",
@@ -182,16 +182,24 @@ class PendingPaymentViewModelTest {
     }
 
     @Test
-    fun verifier_doubleAppuiPendantChecking_ignore() = runTest {
+    fun verifier_doubleAppuiPendantChecking_ignore() = runTest(dispatcher) {
         coEvery { draftStore.getDraft() } returns InscriptionDraft(
             paymentTrackingToken = "tok",
             paymentUrl = "https://pay.example/x",
         )
-        coEvery { authRepository.verifierStatutPaiement("tok") } returns DsiResult.Success("attente")
+        // Réponse différée : checking reste true tant que l'appel n'a pas fini
+        coEvery { authRepository.verifierStatutPaiement("tok") } coAnswers {
+            kotlinx.coroutines.delay(5_000)
+            DsiResult.Success("attente")
+        }
         val vm = createVm()
         advanceUntilIdle()
         vm.verifierPaiement()
-        vm.verifierPaiement() // second while checking
+        // Laisse le premier appel poser checking = true et suspendre sur delay
+        advanceTimeBy(1)
+        assertTrue(vm.uiState.value.checking)
+        vm.verifierPaiement() // doit être ignoré
+        advanceTimeBy(5_000)
         advanceUntilIdle()
         coVerify(exactly = 1) { authRepository.verifierStatutPaiement("tok") }
     }

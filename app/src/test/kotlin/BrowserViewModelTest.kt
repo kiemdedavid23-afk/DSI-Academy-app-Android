@@ -5,9 +5,15 @@ import app.cash.turbine.test
 import app.dsiacademy.academy.core.common.LinkDecision
 import app.dsiacademy.academy.core.common.LinkPolicy
 import app.dsiacademy.academy.core.common.PaymentReturnStatus
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -15,6 +21,16 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BrowserViewModelTest {
+
+    @Before
+    fun setupMainDispatcher() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+    }
+
+    @After
+    fun tearDownMainDispatcher() {
+        Dispatchers.resetMain()
+    }
 
     private val testSiteUrl = "https://exemple.test"
     private val testExternalHosts = setOf("facebook.com", "wa.me")
