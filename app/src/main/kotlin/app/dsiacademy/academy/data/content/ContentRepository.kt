@@ -61,13 +61,11 @@ class ContentRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun isDownloadable(id: String): Boolean {
-        return try {
-            val r = safeCall { api.getBestAsset(id) }
-            (r as? DsiResult.Success)?.data?.downloadable == true
-        } catch (_: Exception) {
-            false
-        }
+    override suspend fun isDownloadable(id: String): Boolean = try {
+        val r = safeCall { api.getBestAsset(id) }
+        (r as? DsiResult.Success)?.data?.downloadable == true
+    } catch (_: Exception) {
+        false
     }
 
     private fun mapNode(dto: FormationTreeDto): FormationNode = FormationNode(

@@ -54,21 +54,21 @@ fun NavGraphBuilder.memberNavGraph(
                 onNavigate = { dest -> goMember(dest) },
                 onLogout = { logout() },
                 content = {
-                when (route) {
-                    Routes.MEMBER_HOME -> MemberHomeScreen(onNavigate = { goMember(it) })
-                    Routes.MEMBER_PROFILE -> ProfileScreen()
-                    Routes.MEMBER_DSI -> DsiScreen()
-                    Routes.MEMBER_REFERRAL -> ReferralScreen()
-                    Routes.MEMBER_WITHDRAWALS -> WithdrawalsScreen()
-                    Routes.MEMBER_PAYMENTS -> PaymentsScreen()
-                    Routes.MEMBER_SUBSCRIPTION -> SubscriptionScreen()
-                    Routes.HOUSE_ACADEMY -> AcademyScreen(
-                        onOpenHouse = { type, title ->
-                            navController.navigate(Routes.houseCatalog(type, title))
-                        },
-                    )
-                    else -> MemberPlaceholder(title = routeLabel(route))
-                }
+                    when (route) {
+                        Routes.MEMBER_HOME -> MemberHomeScreen(onNavigate = { goMember(it) })
+                        Routes.MEMBER_PROFILE -> ProfileScreen()
+                        Routes.MEMBER_DSI -> DsiScreen()
+                        Routes.MEMBER_REFERRAL -> ReferralScreen()
+                        Routes.MEMBER_WITHDRAWALS -> WithdrawalsScreen()
+                        Routes.MEMBER_PAYMENTS -> PaymentsScreen()
+                        Routes.MEMBER_SUBSCRIPTION -> SubscriptionScreen()
+                        Routes.HOUSE_ACADEMY -> AcademyScreen(
+                            onOpenHouse = { type, title ->
+                                navController.navigate(Routes.houseCatalog(type, title))
+                            },
+                        )
+                        else -> MemberPlaceholder(title = routeLabel(route))
+                    }
                 },
             )
         }
