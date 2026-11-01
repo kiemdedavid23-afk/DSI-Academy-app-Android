@@ -1,0 +1,103 @@
+name: APK d'essai (à installer sur ton téléphone)
+
+# Construit un APK de TEST (debug) que tu peux installer sur ton téléphone.
+# Ce n'est PAS la vérification : aucune règle de code, aucun test ici.
+# Lancement manuel : Actions → « APK d'essai » → Run workflow.
+#   adresse_site : facultatif. Adresse du site (https://...) pour tester le bouton Inscription.
+#                  Si tu la laisses vide, on utilise la variable GitHub DSI_SITE_URL, sinon rien.
+# Firebase : non utilisé pour l'instant (aucun fichier google-services.json n'est nécessaire).
+# Signature : clé « debug » standard, créée automatiquement puis gardée en cache pour que
+#             les APK successifs puissent se mettre à jour les uns les autres.
+on:
+  workflow_dispatch:
+    inputs:
+      adresse_site:
+        description: "Adresse du site, ex. https://monsite.com (facultatif)"
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apk-essai-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    name: "Construire l'APK d'essai"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Installer Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Retrouver la clé debug (même clé à chaque APK)
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: dsi-debug-keystore-v1
+
+      - name: Construire l'APK debug
+        id: build
+        shell: bash
+        env:
+          DSI_SITE_URL: ${{ inputs.adresse_site != '' && inputs.adresse_site || vars.DSI_SITE_URL }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/rapport"
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug --stacktrace 2>&1 | tee "$RUNNER_TEMP/rapport/apk.log"
+
+      - name: Nommer l'APK
+        if: ${{ steps.build.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -e
+          APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          mkdir -p livraison
+          cp "$APK" livraison/DSI-Academy-essai.apk
+          ls -la livraison
+          echo "### APK prêt" >> "$GITHUB_STEP_SUMMARY"
+          echo "Télécharge l'artefact « DSI-Academy-essai » en bas de la page du lancement." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publier l'APK
+        if: ${{ steps.build.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: DSI-Academy-essai
+          path: livraison/DSI-Academy-essai.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: "RAPPORT À COPIER (seulement si la construction a échoué)"
+        if: ${{ always() && steps.build.outcome == 'failure' }}
+        shell: bash
+        run: |
+          set +e
+          L="$RUNNER_TEMP/rapport/apk.log"
+          {
+            echo "===== RAPPORT APK D'ESSAI — copie tout depuis cette ligne ====="
+            echo "Commit : ${GITHUB_SHA:-?}"
+            echo ""
+            if grep -q '^e: ' "$L"; then
+              echo "Erreurs de code :"
+              grep '^e: ' "$L" | sed 's#file:///[^ ]*/app/#app/#' | head -60
+              echo ""
+            fi
+            grep -E '^> Task .*FAILED' "$L" | head -10
+            sed -n '/\* What went wrong:/,/\* Try:/p' "$L" | head -40
+            echo ""
+            echo "===== FIN DU RAPPORT ====="
+          } | tee "$RUNNER_TEMP/rapport/RAPPORT.txt"
+          { echo '```'; cat "$RUNNER_TEMP/rapport/RAPPORT.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
