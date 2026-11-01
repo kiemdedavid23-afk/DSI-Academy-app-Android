@@ -65,5 +65,31 @@
 
     <!-- Vérification paiement (CONTRATS-API §2.2) -->
     <string name="payment_check_unavailable">Impossible de vérifier votre paiement pour le moment.</string>
+
+    <!-- Accueil membre (site home / dashboard / premium / drawer) -->
+    <string name="home_hello">Bonjour,</string>
+    <string name="home_welcome_default">Membre DSI</string>
+    <string name="home_balance_title">Solde DSI disponible</string>
+    <string name="home_total_earned_title">Total DSI gagnés</string>
+    <string name="home_subscription_end">Fin: %1$s</string>
+    <string name="home_badge_active">Actif</string>
+    <string name="home_badge_expired">Expiré</string>
+    <string name="home_badge_none">Inactif</string>
+    <string name="home_session_expired">Votre session a expiré. Veuillez vous reconnecter.</string>
+    <string name="home_error_default">Impossible de charger votre tableau de bord.</string>
+    <string name="home_services_title">Services &amp; Actions</string>
+    <string name="home_action_withdrawals">Mes retraits</string>
+    <string name="home_action_referral">Parrainage</string>
+    <string name="home_action_dsi">Mes DSI</string>
+    <string name="home_continue_title">Continuer</string>
+    <string name="home_continue_empty">Explorez une maison (Bibliothèque, Formations…) puis ajoutez une catégorie en favori pour reprendre ici.</string>
+    <string name="home_continue_cta">Reprendre</string>
+    <string name="home_favorites_title">Favoris</string>
+    <string name="home_favorites_empty">Aucun favori pour l’instant. Sur une maison, touchez ★ pour en enregistrer.</string>
+    <string name="home_activity_title">Activité récente</string>
+    <string name="home_activity_empty">Aucune activité récente</string>
+    <string name="home_library">Bibliothèque</string>
+    <string name="home_formations">Formations</string>
+
 </resources>
 
