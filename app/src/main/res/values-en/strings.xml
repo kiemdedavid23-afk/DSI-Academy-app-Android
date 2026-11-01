@@ -36,4 +36,30 @@
     <string name="register_payment_pending">⏳ Payment pending. We will notify you as soon as it is confirmed.</string>
     <string name="register_payment_failed">❌ Payment not confirmed.</string>
 
+
+    <!-- Member home -->
+    <string name="home_hello">Hello,</string>
+    <string name="home_welcome_default">DSI Member</string>
+    <string name="home_balance_title">Available DSI balance</string>
+    <string name="home_total_earned_title">Total DSI earned</string>
+    <string name="home_subscription_end">Ends: %1$s</string>
+    <string name="home_badge_active">Active</string>
+    <string name="home_badge_expired">Expired</string>
+    <string name="home_badge_none">Inactive</string>
+    <string name="home_session_expired">Your session has expired. Please log in again.</string>
+    <string name="home_error_default">Unable to load your dashboard.</string>
+    <string name="home_services_title">Services &amp; Actions</string>
+    <string name="home_action_withdrawals">My withdrawals</string>
+    <string name="home_action_referral">Referral</string>
+    <string name="home_action_dsi">My DSI</string>
+    <string name="home_continue_title">Continue</string>
+    <string name="home_continue_empty">Browse a house (Library, Courses…) then star a category to resume here.</string>
+    <string name="home_continue_cta">Resume</string>
+    <string name="home_favorites_title">Favorites</string>
+    <string name="home_favorites_empty">No favorites yet. In a house, tap ★ to save one.</string>
+    <string name="home_activity_title">Recent activity</string>
+    <string name="home_activity_empty">No recent activity</string>
+    <string name="home_library">Library</string>
+    <string name="home_formations">Courses</string>
+
 </resources>
