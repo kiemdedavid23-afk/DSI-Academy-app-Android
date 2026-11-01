@@ -91,5 +91,37 @@
     <string name="home_library">Bibliothèque</string>
     <string name="home_formations">Formations</string>
 
+
+    <!-- Abonnement (site subscription.* / common.*) -->
+    <string name="subscription_title">Mon abonnement</string>
+    <string name="subscription_subtitle">Consultez le statut de votre accès académique et vos échéances de renouvellement.</string>
+    <string name="subscription_session_expired">Votre session a expiré. Veuillez vous reconnecter.</string>
+    <string name="subscription_error_default">Impossible de charger votre abonnement.</string>
+    <string name="subscription_empty">Aucun abonnement actif pour le moment.</string>
+    <string name="subscription_current_access">ACCÈS ACTUEL</string>
+    <string name="subscription_start_date">Date de début</string>
+    <string name="subscription_end_date">Date de fin</string>
+    <string name="subscription_payment_mode">Mode de paiement</string>
+    <string name="subscription_mode_founder">Compte fondateur</string>
+    <string name="subscription_renew_button">Renouveler mon accès</string>
+    <string name="subscription_choose_mode">Choisissez un mode de paiement</string>
+    <string name="subscription_pay_fcfa">Payer en FCFA</string>
+    <string name="subscription_pay_dsi">Payer avec mes DSI</string>
+    <string name="subscription_confirm_warning">Cette action débitera immédiatement &lt;b&gt;%1$s DSI&lt;/b&gt; de votre solde et prolongera votre abonnement. Cette action ne peut pas être annulée une fois confirmée.</string>
+    <string name="subscription_confirm_debit">Confirmer le débit de %1$s DSI</string>
+    <string name="subscription_processing">Traitement...</string>
+    <string name="subscription_continue_payment">Continuer le paiement →</string>
+    <string name="subscription_action_note">Accès académique garanti par DSI Academy</string>
+    <string name="subscription_history_title">Historique des renouvellements</string>
+    <string name="subscription_history_empty">Aucun historique de renouvellement disponible pour le moment.</string>
+    <string name="subscription_renewal_label">Renouvellement</string>
+    <string name="subscription_mode_label">Mode :</string>
+    <string name="subscription_new_due_date">Nouvelle échéance :</string>
+    <string name="subscription_renew_success">Abonnement renouvelé avec vos DSI.</string>
+    <string name="subscription_renew_refused">Renouvellement refusé.</string>
+    <string name="subscription_unexpected_response">Réponse inattendue du service de paiement.</string>
+    <string name="common_cancel">Annuler</string>
+    <string name="common_back">Retour</string>
+
 </resources>
 
