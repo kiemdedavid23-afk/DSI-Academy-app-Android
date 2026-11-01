@@ -123,6 +123,66 @@ object DsiFormats {
         return if (negative) "-$body" else body
     }
 
+
+    /**
+     * Comme `new Intl.NumberFormat(locale).format(value)` :
+     * FR espace fine + virgule décimale ; EN virgule milliers + point décimal.
+     * Au plus 3 décimales (HALF_UP), zéros inutiles retirés.
+     */
+    fun formatNumber(value: Double, english: Boolean): String {
+        if (value.isNaN() || value.isInfinite()) return "0"
+        val bd = BigDecimal.valueOf(value)
+            .setScale(3, java.math.RoundingMode.HALF_UP)
+            .stripTrailingZeros()
+        val plain = bd.toPlainString() // peut contenir un point
+        val negative = plain.startsWith("-")
+        val body = if (negative) plain.substring(1) else plain
+        val parts = body.split('.')
+        val intPart = parts[0]
+        val frac = parts.getOrNull(1)
+        val grouped = groupDigits(intPart, if (english) "," else "\u202F")
+        val decSep = if (english) "." else ","
+        val withFrac = if (frac != null) grouped + decSep + frac else grouped
+        return if (negative) "-$withFrac" else withFrac
+    }
+
+    /**
+     * Comme toLocaleDateString avec day/month 2-digit, year numeric, hour/minute 2-digit.
+     * FR « 12/03/2027 14:05 » ; EN « 03/12/2027, 02:05 PM ».
+     */
+    fun formatDateTime(
+        epochMs: Long,
+        english: Boolean,
+        zone: TimeZone = TimeZone.getDefault(),
+    ): String {
+        val cal = java.util.Calendar.getInstance(zone).apply { timeInMillis = epochMs }
+        val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
+        val month = cal.get(java.util.Calendar.MONTH) + 1
+        val year = cal.get(java.util.Calendar.YEAR)
+        var hour = cal.get(java.util.Calendar.HOUR_OF_DAY)
+        val minute = cal.get(java.util.Calendar.MINUTE)
+        return if (english) {
+            val amPm = if (hour < 12) "AM" else "PM"
+            var h12 = hour % 12
+            if (h12 == 0) h12 = 12
+            "%02d/%02d/%04d, %02d:%02d %s".format(month, day, year, h12, minute, amPm)
+        } else {
+            "%02d/%02d/%04d %02d:%02d".format(day, month, year, hour, minute)
+        }
+    }
+
+    private fun groupDigits(digits: String, sep: String): String {
+        if (digits.length <= 3) return digits
+        val sb = StringBuilder()
+        var count = 0
+        for (i in digits.length - 1 downTo 0) {
+            if (count > 0 && count % 3 == 0) sb.append(sep)
+            sb.append(digits[i])
+            count++
+        }
+        return sb.reverse().toString()
+    }
+
     private fun normalizeFractionalSeconds(s: String): String {
         // …ss.123456Z ou …ss.123456+01:00 → tronquer la fraction à 3 chiffres
         val regex = Regex("""(\.\d{3})\d+""")
