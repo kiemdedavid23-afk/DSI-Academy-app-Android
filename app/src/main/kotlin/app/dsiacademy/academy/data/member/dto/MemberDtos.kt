@@ -2,7 +2,12 @@ package app.dsiacademy.academy.data.member.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
@@ -49,7 +54,7 @@ data class AbonnementDto(
     val dateFin: String? = null,
     val formule: String? = null,
     val modePaiement: String? = null,
-    val renouvellements: Int? = null,
+    val renouvellements: JsonElement? = null,
     val erreur: String? = null,
 )
 
@@ -187,3 +192,27 @@ data class RetraitEvenementDto(
     val ancienneValeur: String? = null,
     val nouvelleValeur: String? = null,
 )
+
+
+/**
+ * Mappe le champ tolérant « renouvellements » (liste site) vers le domaine.
+ * Tableau → items ; tout autre cas → liste vide. Jamais d'exception.
+ */
+fun JsonElement?.toRenouvellementItems(): List<app.dsiacademy.academy.domain.member.RenouvellementItem> {
+    if (this == null) return emptyList()
+    val array = this as? JsonArray ?: return emptyList()
+    return array.mapNotNull { el ->
+        val obj = el as? JsonObject ?: return@mapNotNull null
+        fun field(key: String): String? {
+            val v = obj[key] ?: return null
+            val prim = v as? JsonPrimitive ?: return null
+            return prim.contentOrNull?.takeIf { it.isNotBlank() && it != "null" }
+        }
+        app.dsiacademy.academy.domain.member.RenouvellementItem(
+            date = field("date"),
+            statut = field("statut"),
+            modePaiement = field("modePaiement"),
+            nouvelleDateFin = field("nouvelleDateFin"),
+        )
+    }
+}
